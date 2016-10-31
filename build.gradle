@@ -1,0 +1,270 @@
+plugins {
+    id "com.github.hierynomus.license" version "0.12.1"
+}
+
+apply plugin: 'idea'
+
+// Load environment specific settings, if the -Penv=xxx parameter is given on invocation
+task loadConfiguration {
+    def environment = null
+    if (project.hasProperty('env')) {
+        environment = project.getProperty('env')
+    } else {
+        environment = "local"
+    }
+
+    logger.quiet "Loading configuration for environment '$environment'."
+    addProjectPropertiesFromFile(file("$rootDir/env-properties/${environment}/settings.properties"))
+}
+
+allprojects {
+    group = 'se.inera.intyg.bi'
+    version = '0-SNAPSHOT'  // This is the version used for continuous builds, no need to change this when building from Jenkins
+
+    if (project.hasProperty("buildVersion")) {
+        version = project.getProperty("buildVersion")
+    }
+
+    project.ext.set("buildVersion", version)
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "https://build-inera.nordicmedtest.se/nexus/content/repositories/releases/" }
+        maven { url "https://build-inera.nordicmedtest.se/nexus/content/repositories/nightly/" }
+        maven { url "https://build-inera.nordicmedtest.se/nexus/content/repositories/snapshots/" }
+        maven { url "https://build-inera.nordicmedtest.se/nexus/content/repositories/thirdparty/" }
+        maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+        maven { url "http://repo.pentaho.org/content/groups/omni/" }
+    }
+
+    buildscript {
+        repositories {
+            mavenLocal()
+            maven { url "https://build-inera.nordicmedtest.se/nexus/content/repositories/snapshots/" }
+            jcenter()
+        }
+    }
+
+}
+
+if (project.hasProperty('runSonar')) {
+    apply plugin: 'sonar-runner'
+    sonarRunner {
+        sonarProperties {
+            property "sonar.jacoco.reportPath", "$buildDir/jacoco/test.exec"
+            property "sonar.projectName", projectName
+            property "sonar.projectKey", projectId
+
+            // Address of SonarQube server
+            property "sonar.host.url", "https://build-inera.nordicmedtest.se/sonar"
+
+            ext.sonarPassword = System.properties['sonarPassword']
+
+            // Database config
+            property "sonar.jdbc.url", "jdbc:mysql://localhost:3306/sonar"
+            property "sonar.jdbc.driverClassName", "com.mysql.jdbc.Driver"
+            property "sonar.jdbc.username", "sonar"
+            property "sonar.jdbc.password", sonarPassword
+
+            //Exclusions
+            property "sonar.test.exclusions", "src/test/**"
+
+            property "sonar.exclusions", [
+                    "file:**/generatedSource/**",
+                    "src/main/java/se/inera/intyg/bi/**/config/**",
+                    "**/stub/**",
+                    "**/exception/**",
+                    "**/*Exception*.java",
+                    "**/*Fake*.java"
+            ]
+
+            project(":bi-persistence") {
+                sonarRunner {
+                    sonarProperties {
+                        property "sonar.javascript.lcov.reportPath", "$buildDir/karma/coverage/lcov/lcov.info"
+                        property "sonar.sources", "${projectDir}/src/main/resources,${projectDir}/src/main/java,${projectDir}/src/main/webapp/app"
+                    }
+                }
+            }
+        }
+    }
+
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'license'
+  //  apply from: rootProject.file("tools/codeQuality/codeQuality.gradle")
+
+
+//    if (project.hasProperty('runSonar')) {
+//        apply plugin: 'jacoco'
+//
+//        jacoco {
+//            toolVersion = "0.7.1.201405082137"
+//        }
+//        jacocoTestReport {
+//
+//            classDirectories =  files(sourceSets.main.output)
+//            sourceDirectories = files(sourceSets.main.allJava.srcDirs)
+//
+//            reports {
+//                xml.enabled false
+//                csv.enabled false
+//                html.destination "${buildDir}/jacocoHtml"
+//            }
+//        }
+//
+//    }
+
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+
+    ext {
+        // >>> Dependency Management
+
+        // External
+        activemqVersion = "5.13.0"
+
+        commonsCodecVersion = "1.10"
+        commonsIoVersion = "2.4"
+        commonsLangVersion = "2.6"
+        commonsLang3Version = "3.1"
+
+        cxfVersion = "3.1.3"
+
+        googleGuavaVersion = "18.0"
+
+        itextVersion = "5.5.8"
+
+        jacksonVersion = "2.5.1"
+        javaxJmsVersion = "1.1-rev-1"
+        javaxMailVersion = "1.5.2"
+        javaxServletVersion = "3.1.0"
+        jaxb2Version = "0.9.5"
+        jsonSimpleVersion = "1.1.1"
+        jstlVersion = "1.2"
+
+        liquibaseVersion = "3.3.1"
+        logbackVersion = "1.0.13"
+
+        poiVersion = "3.13"
+
+        restAssuredVersion = "2.9.0"
+
+        slf4jVersion = "1.7.10"
+        springContextVersion = "4.2.2.RELEASE"
+        springSecurityVersion = "4.0.3.RELEASE"
+        springSecurityExtensionsVersion = "1.0.1.RELEASE"
+        springWsCoreVersion = "2.2.2.RELEASE"
+
+        wsdl4jVersion = "1.6.3"
+
+        // Internal
+        if (project.hasProperty("buildJenkins")) {
+            intygCommonVersion = "3.1.+"
+        } else {
+            intygCommonVersion = "0-SNAPSHOT"
+        }
+
+        // Schemas
+        rehabSchemaVersion = "1.0.3"
+        monitoringSchemaVersion = "1.0.0.3"
+        internalMonitoringSchemaVersion = "1.0.2"
+
+        // Test
+        aspectjWeaverVersion = "1.6.11"
+        hamcrestVersion = "1.3"
+        junitVersion = "4.12"
+        mockitoAllVersion = "1.10.19"
+        powermockFullVersion = "1.6.4"
+        unitilsCoreVersion = "3.3"
+
+        // <<< Dependency management
+
+
+        setProperty("buildTime", getDate().toString())
+        setProperty("buildNumber", System.env.BUILD_NUMBER ? System.env.BUILD_NUMBER : "SNAPSHOT")
+        setProperty("buildVersion", version)
+    }
+
+    license {
+        ext.url = 'https://github.com/sklintyg/bi'
+        ext.name = rootProject.name
+        ext.year = Calendar.getInstance().get(Calendar.YEAR)
+        strictCheck true
+        header rootProject.file("header.txt")
+        includes(["**/*.xml", "**/se/inera/**/*.java"])
+    }
+
+}
+
+configure (subprojects.findAll {
+    [
+            'bi-web'
+    ].contains(it.name) }) {
+
+    apply plugin: 'maven'
+
+    configurations { deployerJars }
+
+    dependencies { deployerJars "org.apache.maven.wagon:wagon-webdav:1.0-beta-2" }
+
+    ext.nexusUsername = System.properties['nexusUsername']
+    ext.nexusPassword = System.properties['nexusPassword']
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                configuration = configurations.deployerJars
+                if (version ==~ /.+-a\d+$/) {
+                    repository(url: "https://build-inera.nordicmedtest.se/nexus/content/repositories/nightly") {
+                        authentication(userName: nexusUsername, password: nexusPassword)
+                    }
+                } else {
+                    repository(url: "https://build-inera.nordicmedtest.se/nexus/content/repositories/releases") {
+                        authentication(userName: nexusUsername, password: nexusPassword)
+                    }
+                }
+                snapshotRepository(url: "https://build-inera.nordicmedtest.se/nexus/content/repositories/snapshots") {
+                    authentication(userName: nexusUsername, password: nexusPassword)
+                }
+                uniqueVersion = false
+            }
+        }
+    }
+}
+
+idea {
+    module {
+        excludeDirs += file('test/node_modules')
+        excludeDirs += file('test/dev/report')
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.11' //version required
+}
+
+
+def addProjectPropertiesFromFile(propfile) {
+    if (propfile.exists()) {
+        def props = new Properties();
+        propfile.withInputStream { props.load(it) }
+        allprojects { subproject ->
+            props.each { key, value ->
+                subproject.ext.setProperty(key, value.toString())
+            }
+        }
+    } else {
+        throw new GradleScriptException("File '${propfile.path}' does not exist.", null)
+    }
+}
+
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyy-MM-dd HH:mm:ss')
+    return formattedDate
+}
+
