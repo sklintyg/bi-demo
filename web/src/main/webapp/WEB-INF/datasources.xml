@@ -76,7 +76,7 @@ but our license plugin requires our license to be on top to even compile so the 
          Catalogs can override the connect string with their own
          <DataSourceInfo> element.
       -->
-    <DataSourceInfo>Provider=mondrian;Jdbc=jdbc:mysql://localhost:3306/bi;JdbcDrivers=com.mysql.jdbc.Driver;JdbcUser=bi;JdbcPassword=bi;PoolNeeded=false;Catalog=file:/Users/eriklupander/intyg/bi-demo/web/src/main/webapp/WEB-INF/intyg.xml</DataSourceInfo>
+    <DataSourceInfo>Provider=mondrian;Jdbc=jdbc:mysql://localhost:3306/bi;JdbcDrivers=com.mysql.jdbc.Driver;JdbcUser=bi;JdbcPassword=bi;PoolNeeded=false;Catalog=file:/<YOUR PATH TO THE BI DEMO FOLDER>/bi-demo/web/src/main/webapp/WEB-INF/intyg.xml</DataSourceInfo>
 
     <!--
          Provider name must be 'Mondrian'.

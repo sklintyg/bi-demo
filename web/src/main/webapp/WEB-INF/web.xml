@@ -9,37 +9,6 @@ Copyright (C) 2002-2005 Julian Hyde and others
 All Rights Reserved.
 -->
 <web-app>
-
-  <!--
-  <servlet>
-    <servlet-name>MondrianXmlaServlet</servlet-name>
-    <servlet-class>mondrian.xmla.impl.DynamicDatasourceXmlaServlet</servlet-class>
-    <init-param>
-      <param-name>DataSourcesConfig</param-name>
-      <param-value>file:/Users/eriklupander/intyg/bi/web/src/main/resources/datasources.xml</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet>
-    <servlet-name>MdxQueryServlet</servlet-name>
-    <servlet-class>mondrian.web.servlet.MdxQueryServlet</servlet-class>
-    <init-param>
-      <param-name>connectString</param-name>
-      <param-value>Provider=mondrian;Jdbc=jdbc:mysql://localhost:3306/bi;JdbcUser=bi;JdbcPassword=bi;Catalog=/WEB-INF/intyg.xml;JdbcDrivers=com.mysql.jdbc.Driver;</param-value>
-    </init-param>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>MondrianXmlaServlet</servlet-name>
-    <url-pattern>/xmla</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>MdxQueryServlet</servlet-name>
-    <url-pattern>/mdx</url-pattern>
-  </servlet-mapping>
-  -->
-
   <session-config>
     <session-timeout>30</session-timeout>
   </session-config>
