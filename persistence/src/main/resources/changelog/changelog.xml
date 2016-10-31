@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2016 Inera AB (http://www.inera.se)
+
+    This file is part of bi (https://github.com/sklintyg/bi).
+
+    bi is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    bi is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+  logicalFilePath="classpath:changelog/changelog.xml">
+  
+
+  <changeSet id="1" author="el">
+    <createTable tableName="dim_icd">
+      <column name="ICD_CODE" type="varchar(32)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="dim_vardgivare">
+      <column name="HSA_ID" type="varchar(64)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="VARDGIVARE_NAMN" type="text"></column>
+    </createTable>
+
+    <createTable tableName="dim_vardenhet">
+      <column name="HSA_ID" type="varchar(64)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="VARDENHET_NAMN" type="text"></column>
+      <column name="VARDGIVARE_ID" type="varchar(64)"></column>
+    </createTable>
+    
+    <createTable tableName="fact_intyg">
+      <column name="ID" type="varchar(255)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="CERTIFICATE_TYPE" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="PATIENT_BIRTHDATE" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CARE_UNIT_ID" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CARE_UNIT_NAME" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="CARE_GIVER_ID" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGNING_DOCTOR_ID" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGNING_DOCTOR_NAME" type="varchar(255)">
+        <constraints nullable="false" />
+      </column>
+      <column name="DIAGNOSE_CODE" type="varchar(64)">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGNING_DATETIME" type="datetime">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGN_YEAR" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGN_MONTH" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="SIGN_DAY" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="TOTAL_DURATION" defaultValue="10" type="int">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <sqlFile path="changelog/dim_date_mysql.sql" />
+
+  </changeSet>
+
+  <changeSet id="2" author="el">
+    <createTable tableName="dim_intygstyp">
+      <column name="typ" type="varchar(16)">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+      <column name="namn" type="varchar(255)"></column>
+    </createTable>
+
+    <sql>
+      INSERT INTO dim_intygstyp VALUES('fk7263','Försäkringskassan fk7263');
+      INSERT INTO dim_intygstyp VALUES('lisjp','Läkarintyg Sjukpenning');
+    </sql>
+  </changeSet>
+
+  <changeSet id="3" author="el">
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_CARE_GIVER_ID">
+      <column name="CARE_GIVER_ID"></column>
+    </createIndex>
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_CARE_UNIT_ID">
+      <column name="CARE_UNIT_ID"></column>
+    </createIndex>
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_DIAGNOSE_CODE">
+      <column name="DIAGNOSE_CODE"></column>
+    </createIndex>
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_SIGN_YEAR">
+      <column name="SIGN_YEAR"></column>
+    </createIndex>
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_CERTIFICATE_TYPE">
+      <column name="CERTIFICATE_TYPE"></column>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

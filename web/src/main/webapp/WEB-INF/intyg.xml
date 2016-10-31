@@ -1,0 +1,276 @@
+<?xml version='1.0'?>
+<!--
+
+    Copyright (C) 2016 Inera AB (http://www.inera.se)
+
+    This file is part of bi (https://github.com/sklintyg/bi).
+
+    bi is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    bi is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<Schema name='Intyg' metamodelVersion='4.0'>
+  <PhysicalSchema>
+    <Table name='fact_intyg'>
+      <Key>
+        <Column name='ID'/>
+      </Key>
+    </Table>
+
+    <Table name='dim_date'>
+      <Key>
+        <Column name='date_sk'/>
+      </Key>
+    </Table>
+
+    <Table name='dim_intygstyp'>
+      <Key>
+        <Column name='typ'/>
+      </Key>
+    </Table>
+
+    <Table name='dim_icd'>
+      <Key>
+        <Column name='ICD_CODE'/>
+      </Key>
+    </Table>
+
+    <Table name='dim_vardgivare'>
+      <Key>
+        <Column name='HSA_ID'/>
+      </Key>
+    </Table>
+
+    <Table name='dim_vardenhet'>
+      <Key>
+        <Column name='HSA_ID'/>
+      </Key>
+    </Table>
+
+    <Link source='fact_intyg' target='dim_date'>
+      <ForeignKey>
+        <Column name='date_sk'/>
+      </ForeignKey>
+    </Link>
+
+  </PhysicalSchema>
+
+
+  <Cube name='Intyg' defaultMeasure='Antal intyg'>
+    <Dimensions>
+
+      <!--
+      <Dimension name='Careunit' table='fact_intyg' key="ID">
+        <Attributes>
+          <Attribute name='Care unit name' keyColumn='CARE_UNIT_NAME' hasHierarchy='true'/>
+            <Attribute name='Care unit hsaId' keyColumn='CARE_UNIT_ID' hasHierarchy='true'/>
+            <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
+         </Attributes>
+       </Dimension>
+       <Dimension name='Caregiver' table='fact_intyg' key="ID">
+         <Attributes>
+           <Attribute name='Care giver hsaId' keyColumn='CARE_GIVER_ID' hasHierarchy='true'/>
+           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
+         </Attributes>
+       </Dimension>
+       <Dimension name='Diagnoskod' table='fact_intyg' key="ID">
+         <Attributes>
+           <Attribute name='Diagnoskod' keyColumn='DIAGNOSE_CODE' hasHierarchy='true'/>
+           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
+         </Attributes>
+       </Dimension>
+       <Dimension name='Intygstyp' table='fact_intyg' key="ID">
+         <Attributes>
+           <Attribute name='Typ' keyColumn='CERTIFICATE_TYPE' hasHierarchy='true'/>
+           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
+         </Attributes>
+       </Dimension>
+       -->
+
+      <Dimension name='Intygstyp' table='dim_intygstyp' key="Typ">
+        <Attributes>
+          <Attribute name='Typ' keyColumn='typ' hasHierarchy='true'/>
+        </Attributes>
+      </Dimension>
+      <Dimension name='Diagnoskod' table='dim_icd' key="ICD_CODE">
+        <Attributes>
+          <Attribute name='ICD_CODE' keyColumn='ICD_CODE' hasHierarchy='true'/>
+        </Attributes>
+      </Dimension>
+      <Dimension name='Vardgivare' table='dim_vardgivare' key="VardgivarId">
+        <Attributes>
+          <Attribute name='VardgivarId' keyColumn='HSA_ID' hasHierarchy='true'/>
+        </Attributes>
+      </Dimension>
+      <Dimension name='Vardenhet' table='dim_vardenhet' key="VardenhetsId">
+      <Attributes>
+        <Attribute name='VardenhetsId' keyColumn='HSA_ID' hasHierarchy='true'/>
+        <Attribute name='Namn' keyColumn='VARDENHET_NAMN' hasHierarchy='true'/>
+      </Attributes>
+    </Dimension>
+
+      <Dimension name='Ar' table='fact_intyg' key="Ar">
+        <Attributes>
+          <Attribute name='Ar' keyColumn='SIGN_YEAR' hasHierarchy='true'/>
+        </Attributes>
+      </Dimension>
+
+       <Dimension name="Date" table='dim_date' type='TIME' key="ID">
+         <Attributes>
+           <Attribute name='ID' keyColumn='date_sk' hasHierarchy='false'/>
+           <Attribute name='Year' keyColumn='year_number' levelType='TimeYears' hasHierarchy='false'/>
+           <Attribute name='Quarter' levelType='TimeQuarters' hasHierarchy='false'>
+             <Key>
+               <Column name='year_number'/>
+               <Column name='quarter_number'/>
+             </Key>
+             <Name>
+               <Column name='quarter_name'/>
+             </Name>
+           </Attribute>
+           <Attribute name='Month' levelType='TimeMonths' hasHierarchy='false'>
+             <Key>
+               <Column name='year_number'/>
+               <Column name='month_number'/>
+             </Key>
+             <Name>
+               <Column name='month_name'/>
+             </Name>
+           </Attribute>
+           <Attribute name='Day' levelType='TimeDays' hasHierarchy='false'>
+             <Key>
+               <Column name='year_number'/>
+               <Column name='month_number'/>
+               <Column name='day_of_month_number'/>
+             </Key>
+             <Name>
+               <Column name='day_of_month_number'/>
+             </Name>
+           </Attribute>
+         </Attributes>
+         <Hierarchies>
+           <Hierarchy name='Time' hasAll='true'>
+             <Level attribute='Year'>
+               <Annotations>
+                 <Annotation name="AnalyzerDateFormat">[yyyy]</Annotation>
+               </Annotations>
+             </Level>
+             <Level attribute='Quarter'>
+               <Annotations>
+                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq]</Annotation>
+               </Annotations>
+             </Level>
+             <Level attribute='Month'>
+               <Annotations>
+                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm]</Annotation>
+               </Annotations>
+             </Level>
+             <Level attribute='Day'>
+               <Annotations>
+                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm].[dd]</Annotation>
+               </Annotations>
+             </Level>
+           </Hierarchy>
+         </Hierarchies>
+       </Dimension>
+
+     </Dimensions>
+     <MeasureGroups>
+       <MeasureGroup name='Average' table='fact_intyg'>
+         <Measures>
+            <Measure name='Antal intyg' column='ID' aggregator='count' formatString='Standard'/>
+            <Measure name='Genomsnittlig sjukskr. langd' column='TOTAL_DURATION' aggregator='avg' formatString='Standard'/>
+         </Measures>
+
+         <DimensionLinks>
+           <FactLink dimension='Ar'/>
+
+           <ForeignKeyLink foreignKeyColumn='CARE_GIVER_ID' dimension='Vardgivare'/>
+           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
+
+           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
+             <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
+             <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
+
+           </DimensionLinks>
+
+       </MeasureGroup>
+
+       <MeasureGroup name='Max' table='fact_intyg'>
+         <Measures>
+           <Measure name='Max sjukskr. langd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
+         </Measures>
+
+         <DimensionLinks>
+           <FactLink dimension='Ar'/>
+
+           <ForeignKeyLink foreignKeyColumn='CARE_GIVER_ID' dimension='Vardgivare'/>
+           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
+
+           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
+           <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
+           <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
+
+         </DimensionLinks>
+
+       </MeasureGroup>
+
+       <!--
+       <MeasureGroup name='Max' table='fact_intyg'>
+         <Measures>
+           <Measure name='Maximal sjukskr. längd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
+         </Measures>
+
+         <DimensionLinks>
+           <FactLink dimension='Vardenhet'/>
+           <FactLink dimension='Vardgivare'/>
+           <FactLink dimension='Diagnoskod'/>
+           <FactLink dimension='Intygstyp'/>
+           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
+
+         </DimensionLinks>
+
+       </MeasureGroup>
+       -->
+       <!--<MeasureGroup name='Sum' table='fact_intyg'>
+          <Measures>
+
+          </Measures>
+          <DimensionLinks>
+              <FactLink dimension='Location'/>
+              <FactLink dimension='Date'/>
+              <FactLink dimension='Network'/>
+          </DimensionLinks>
+      </MeasureGroup>
+      <MeasureGroup name='Max' table='fact_intyg'>
+          <Measures>
+
+          </Measures>
+          <DimensionLinks>
+              <FactLink dimension='Location'/>
+              <FactLink dimension='Date'/>
+              <FactLink dimension='Network'/>
+          </DimensionLinks>
+      </MeasureGroup>
+      <MeasureGroup name='Count' table='fact_intyg'>
+          <Measures>
+          </Measures>
+          <DimensionLinks>
+              <FactLink dimension='Location'/>
+              <FactLink dimension='Date'/>
+              <FactLink dimension='Network'/>
+          </DimensionLinks>
+      </MeasureGroup>-->
+    </MeasureGroups>
+  </Cube>
+</Schema>

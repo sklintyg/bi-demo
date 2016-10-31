@@ -1,0 +1,8 @@
+/*
+  Gradle settings for Rehabstod
+ */
+rootProject.name = 'bi'
+include ':persistence',':web'
+
+project(':persistence').name = 'bi-persistence'
+project(':web').name = 'bi-web'

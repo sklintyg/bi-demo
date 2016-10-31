@@ -1,0 +1,137 @@
+buildscript {
+    dependencies {
+        classpath 'org.akhikhl.gretty:gretty:1.2.4'
+	    classpath 'se.inera.intyg:gradle-fitnesse-plugin:1.0-SNAPSHOT'
+    }
+}
+
+apply plugin: 'war'
+apply plugin: 'org.akhikhl.gretty'
+apply plugin: 'idea'
+
+war.rootSpec.exclude "logback.xml"
+
+
+idea {
+    module {
+        //and some extra test source dirs
+        excludeDirs += file('node_modules')
+        excludeDirs += file('src/main/webapp/bower_components')
+    }
+}
+
+
+
+task assembleManifestClasspath() << {
+    war {
+        manifest {
+            attributes("Build": buildVersion)
+            attributes("Build-Time": buildTime)
+            def gitRevision = System.env.GIT_COMMIT != null ? System.env.GIT_COMMIT : 'Local-build'
+            attributes("Git-revision" : gitRevision)
+        }
+    }
+}
+
+war.dependsOn assembleManifestClasspath
+
+task createVersionPropertyFile(dependsOn: processResources) << {
+    def propertyFile = "${buildDir}/resources/main/version.properties"
+    ant.touch(file: propertyFile, mkdirs: "true")
+    ant.propertyfile(file: propertyFile) {
+        entry(key: 'buildVersion', default: buildVersion)
+        entry(key: 'buildTime', default: buildTime)
+        entry(key: 'buildNumber', default: buildNumber)
+    }
+}
+
+createVersionPropertyFile.dependsOn assembleManifestClasspath
+
+war.dependsOn createVersionPropertyFile
+
+
+gretty {
+    httpPort = 8020
+    contextConfigFile = "${projectDir}/src/main/resources/jetty-web.xml"
+    contextPath = '/'
+    logbackConfigFile = "${projectDir}/src/main/resources/logback.xml"
+    jvmArgs = [
+        '-Dspring.profiles.active=test',
+        '-Dbi.config.file=' + projectDir + '/src/main/resources/dev.properties',
+        '-Dcredentials.file=' + projectDir + '/src/main/resources/dev-credentials.properties',
+        '-Dbi.resources.folder=/' +projectDir + '/../src/main/resources',
+        '-XX:MaxPermSize=256M',
+        '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8018'
+    ]
+
+/***************** Konfiguration för att köra med SITHS och HSA aktiverat lokalt. *******************/
+//    jvmArgs = [
+//            '-Dspring.profiles.active=dev,rhs-security-test',
+//            '-Dbi.config.folder=' + projectDir + '/../../bi-konfiguration/demo',
+//            '-Dbi.config.file=' + projectDir + '/../../bi-konfiguration/demo/bi.properties',
+//            '-Dcredentials.file=' + projectDir + '/../../bi-konfiguration/demo/credentials.properties',
+//            '-Dbi.resources.folder=/' +projectDir + '/../src/main/resources'
+//    ]
+    fastReload = true
+    inplaceMode = 'hard'
+    scanInterval = 0
+    enableNaming = true
+}
+
+dependencies {
+    compile project(":bi-persistence")
+
+    compile "org.springframework:spring-webmvc:${springContextVersion}"
+    compile "org.springframework:spring-jms:${springContextVersion}"
+    compile "org.springframework.ws:spring-ws-core:${springWsCoreVersion}"
+    compile "org.springframework.security:spring-security-config:${springSecurityVersion}"
+    compile "org.springframework.security.extensions:spring-security-saml2-core:${springSecurityExtensionsVersion}"
+    compile "org.springframework.security:spring-security-web:${springSecurityVersion}"
+
+    compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}" // was 2.4.4
+    compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"  // was 2.4.4
+
+    compile "com.googlecode.json-simple:json-simple:${jsonSimpleVersion}"
+    compile "org.slf4j:slf4j-api:${slf4jVersion}"
+    compile "ch.qos.logback:logback-classic:${logbackVersion}"
+    compile "wsdl4j:wsdl4j:${wsdl4jVersion}"
+    compile "commons-lang:commons-lang:${commonsLangVersion}"
+    compile "org.apache.commons:commons-lang3:${commonsLang3Version}"
+
+    compile "se.riv.clinicalprocess.healthcond.monitoring:clinicalprocess-healthcond-monitoring-schemas:${internalMonitoringSchemaVersion}"
+
+    compile "org.apache.cxf:cxf-rt-frontend-jaxws:${cxfVersion}"
+    compile "org.apache.cxf:cxf-rt-frontend-jaxrs:${cxfVersion}"
+    compile "org.apache.cxf:cxf-rt-transports-http:${cxfVersion}"
+
+    compile "org.apache.poi:poi:${poiVersion}"
+    compile "org.apache.poi:poi-ooxml:${poiVersion}"
+    compile "com.itextpdf:itextpdf:${itextVersion}"
+
+    providedCompile "javax.jms:jms-api:${javaxJmsVersion}"
+    providedCompile "javax.servlet:javax.servlet-api:${javaxServletVersion}"
+    providedCompile "jstl:jstl:${jstlVersion}"
+
+
+
+    testCompile "org.hamcrest:hamcrest-all:${hamcrestVersion}"
+    testCompile ("junit:junit:${junitVersion}") {
+        exclude module : "hamcrest"
+        exclude module : "hamcrest-core"
+    }
+    testCompile "org.mockito:mockito-all:${mockitoAllVersion}"
+    testCompile "org.powermock:powermock-mockito-release-full:${powermockFullVersion}"
+
+    testCompile "org.springframework:spring-test:${springContextVersion}"
+    testCompile "org.unitils:unitils-core:${unitilsCoreVersion}"
+
+    gretty "org.apache.activemq:activemq-client:${activemqVersion}"
+    gretty "org.apache.activemq:activemq-broker:${activemqVersion}"
+
+       compile "pentaho:mondrian:4.3.1.8-207"
+    
+
+
+    gretty 'mysql:mysql-connector-java:5.1.39'
+    gretty "xml-apis:xml-apis:1.4.01"
+}

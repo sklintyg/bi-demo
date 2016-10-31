@@ -1,0 +1,8 @@
+2016-10-26 19:23:53,076 - Root WebApplicationContext: initialization started
+2016-10-26 19:23:53,116 - Refreshing Root WebApplicationContext: startup date [Wed Oct 26 19:23:53 CEST 2016]; root of context hierarchy
+2016-10-26 19:23:53,159 - Registering annotated classes: [class se.inera.intyg.bi.web.config.ApplicationConfig,class se.inera.intyg.bi.persistence.config.PersistenceConfigDev]
+2016-10-26 19:23:53,324 - JSR-330 'javax.inject.Inject' annotation found and supported for autowiring
+2016-10-26 19:23:53,847 - HikariCP pool HikariPool-0 is starting.
+2016-10-26 19:23:54,969 - Root WebApplicationContext: initialization completed in 1891 ms
+2016-10-26 19:24:43,124 - Closing Root WebApplicationContext: startup date [Wed Oct 26 19:23:53 CEST 2016]; root of context hierarchy
+2016-10-26 19:24:43,132 - HikariCP pool HikariPool-0 is shutting down.
