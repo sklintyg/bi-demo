@@ -1,0 +1,37 @@
+apply plugin: 'war'
+
+group 'se.inera.intyg.saiku-ui'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {
+        url "http://repo.meteorite.bi/content/repositories/alabs-release-local"
+    }
+}
+
+configurations {
+    saikuZipfile
+}
+
+dependencies {
+    saikuZipfile "org.saikuanalytics:saiku-ui:3.8.8@zip"
+}
+
+task extractZipDependencies(type: Copy) {
+    description 'Extract saiku-ui artifact to staging work directory'
+    from zipTree(configurations.saikuZipfile.singleFile)
+    into "$buildDir/work/"
+}
+
+task copyCustomFiles(type: Copy, dependsOn: extractZipDependencies) {
+    description 'Overlay our customized files to staging work directory'
+    from('src')
+    into "$buildDir/work/"
+}
+
+war {
+    dependsOn copyCustomFiles
+    from fileTree("$buildDir/work") // adds a file-set to the root of the archive
+}
+
+defaultTasks("war")
