@@ -27,12 +27,6 @@
       </Key>
     </Table>
 
-    <Table name='dim_date'>
-      <Key>
-        <Column name='date_sk'/>
-      </Key>
-    </Table>
-
     <Table name='dim_intygstyp'>
       <Key>
         <Column name='typ'/>
@@ -51,51 +45,24 @@
       </Key>
     </Table>
 
+
     <Table name='dim_vardenhet'>
       <Key>
         <Column name='HSA_ID'/>
       </Key>
     </Table>
 
-    <Link source='fact_intyg' target='dim_date'>
+
+    <Link target='dim_vardenhet' source='dim_vardgivare'>
       <ForeignKey>
-        <Column name='date_sk'/>
+        <Column name='VARDGIVARE_ID'/>
       </ForeignKey>
     </Link>
 
   </PhysicalSchema>
 
-
   <Cube name='Intyg' defaultMeasure='Antal intyg'>
     <Dimensions>
-
-      <!--
-      <Dimension name='Careunit' table='fact_intyg' key="ID">
-        <Attributes>
-          <Attribute name='Care unit name' keyColumn='CARE_UNIT_NAME' hasHierarchy='true'/>
-            <Attribute name='Care unit hsaId' keyColumn='CARE_UNIT_ID' hasHierarchy='true'/>
-            <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
-         </Attributes>
-       </Dimension>
-       <Dimension name='Caregiver' table='fact_intyg' key="ID">
-         <Attributes>
-           <Attribute name='Care giver hsaId' keyColumn='CARE_GIVER_ID' hasHierarchy='true'/>
-           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
-         </Attributes>
-       </Dimension>
-       <Dimension name='Diagnoskod' table='fact_intyg' key="ID">
-         <Attributes>
-           <Attribute name='Diagnoskod' keyColumn='DIAGNOSE_CODE' hasHierarchy='true'/>
-           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
-         </Attributes>
-       </Dimension>
-       <Dimension name='Intygstyp' table='fact_intyg' key="ID">
-         <Attributes>
-           <Attribute name='Typ' keyColumn='CERTIFICATE_TYPE' hasHierarchy='true'/>
-           <Attribute name="ID" keyColumn='ID' hasHierarchy='false'/>
-         </Attributes>
-       </Dimension>
-       -->
 
       <Dimension name='Intygstyp' table='dim_intygstyp' key="Typ">
         <Attributes>
@@ -107,17 +74,28 @@
           <Attribute name='ICD_CODE' keyColumn='ICD_CODE' hasHierarchy='true'/>
         </Attributes>
       </Dimension>
-      <Dimension name='Vardgivare' table='dim_vardgivare' key="VardgivarId">
+
+
+      <Dimension name='Vardenhet' table='dim_vardenhet' key="VardenhetId">
         <Attributes>
-          <Attribute name='VardgivarId' keyColumn='HSA_ID' hasHierarchy='true'/>
+
+          <Attribute name="VardgivareId" keyColumn="HSA_ID" table="dim_vardgivare" hasHierarchy='true' visible="false"></Attribute>
+
+          <Attribute name='VardenhetId' table='dim_vardenhet' keyColumn='HSA_ID' hasHierarchy='false'/>
+
+          <Attribute name='Vardenhetsnamn' table='dim_vardenhet' hasHierarchy='false' orderByColumn="VARDENHET_NAMN"
+              keyColumn='HSA_ID' nameColumn='VARDENHET_NAMN'/>
+
         </Attributes>
+
+        <Hierarchies>
+          <Hierarchy name='Vardenheter'>
+            <Level attribute='VardgivareId'/>
+            <Level attribute='Vardenhetsnamn'/>
+            <Level attribute='VardenhetId'/>
+          </Hierarchy>
+        </Hierarchies>
       </Dimension>
-      <Dimension name='Vardenhet' table='dim_vardenhet' key="VardenhetsId">
-      <Attributes>
-        <Attribute name='VardenhetsId' keyColumn='HSA_ID' hasHierarchy='true'/>
-        <Attribute name='Namn' keyColumn='VARDENHET_NAMN' hasHierarchy='true'/>
-      </Attributes>
-    </Dimension>
 
       <Dimension name='Ar' table='fact_intyg' key="Ar">
         <Attributes>
@@ -125,152 +103,109 @@
         </Attributes>
       </Dimension>
 
-       <Dimension name="Date" table='dim_date' type='TIME' key="ID">
-         <Attributes>
-           <Attribute name='ID' keyColumn='date_sk' hasHierarchy='false'/>
-           <Attribute name='Year' keyColumn='year_number' levelType='TimeYears' hasHierarchy='false'/>
-           <Attribute name='Quarter' levelType='TimeQuarters' hasHierarchy='false'>
-             <Key>
-               <Column name='year_number'/>
-               <Column name='quarter_number'/>
-             </Key>
-             <Name>
-               <Column name='quarter_name'/>
-             </Name>
-           </Attribute>
-           <Attribute name='Month' levelType='TimeMonths' hasHierarchy='false'>
-             <Key>
-               <Column name='year_number'/>
-               <Column name='month_number'/>
-             </Key>
-             <Name>
-               <Column name='month_name'/>
-             </Name>
-           </Attribute>
-           <Attribute name='Day' levelType='TimeDays' hasHierarchy='false'>
-             <Key>
-               <Column name='year_number'/>
-               <Column name='month_number'/>
-               <Column name='day_of_month_number'/>
-             </Key>
-             <Name>
-               <Column name='day_of_month_number'/>
-             </Name>
-           </Attribute>
-         </Attributes>
-         <Hierarchies>
-           <Hierarchy name='Time' hasAll='true'>
-             <Level attribute='Year'>
-               <Annotations>
-                 <Annotation name="AnalyzerDateFormat">[yyyy]</Annotation>
-               </Annotations>
-             </Level>
-             <Level attribute='Quarter'>
-               <Annotations>
-                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq]</Annotation>
-               </Annotations>
-             </Level>
-             <Level attribute='Month'>
-               <Annotations>
-                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm]</Annotation>
-               </Annotations>
-             </Level>
-             <Level attribute='Day'>
-               <Annotations>
-                 <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm].[dd]</Annotation>
-               </Annotations>
-             </Level>
-           </Hierarchy>
-         </Hierarchies>
-       </Dimension>
+      <Dimension name="Kon" table="fact_intyg" key="Kon">
+        <Attributes>
+          <Attribute name='Kon' keyColumn='GENDER' hasHierarchy='true'/>
+        </Attributes>
+      </Dimension>
 
-     </Dimensions>
-     <MeasureGroups>
-       <MeasureGroup name='Average' table='fact_intyg'>
-         <Measures>
-            <Measure name='Antal intyg' column='ID' aggregator='count' formatString='Standard'/>
-            <Measure name='Genomsnittlig sjukskr. langd' column='TOTAL_DURATION' aggregator='avg' formatString='Standard'/>
-         </Measures>
+      <!--
+      <Dimension name="Date" table='dim_date' type='TIME' key="ID">
+        <Attributes>
+          <Attribute name='ID' keyColumn='date_sk' hasHierarchy='false'/>
+          <Attribute name='Year' keyColumn='year_number' levelType='TimeYears' hasHierarchy='false'/>
+          <Attribute name='Quarter' levelType='TimeQuarters' hasHierarchy='false'>
+            <Key>
+              <Column name='year_number'/>
+              <Column name='quarter_number'/>
+            </Key>
+            <Name>
+              <Column name='quarter_name'/>
+            </Name>
+          </Attribute>
+          <Attribute name='Month' levelType='TimeMonths' hasHierarchy='false'>
+            <Key>
+              <Column name='year_number'/>
+              <Column name='month_number'/>
+            </Key>
+            <Name>
+              <Column name='month_name'/>
+            </Name>
+          </Attribute>
+          <Attribute name='Day' levelType='TimeDays' hasHierarchy='false'>
+            <Key>
+              <Column name='year_number'/>
+              <Column name='month_number'/>
+              <Column name='day_of_month_number'/>
+            </Key>
+            <Name>
+              <Column name='day_of_month_number'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+        <Hierarchies>
+          <Hierarchy name='Time' hasAll='true'>
+            <Level attribute='Year'>
+              <Annotations>
+                <Annotation name="AnalyzerDateFormat">[yyyy]</Annotation>
+              </Annotations>
+            </Level>
+            <Level attribute='Quarter'>
+              <Annotations>
+                <Annotation name="AnalyzerDateFormat">[yyyy].[Qq]</Annotation>
+              </Annotations>
+            </Level>
+            <Level attribute='Month'>
+              <Annotations>
+                <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm]</Annotation>
+              </Annotations>
+            </Level>
+            <Level attribute='Day'>
+              <Annotations>
+                <Annotation name="AnalyzerDateFormat">[yyyy].[Qq].[mm].[dd]</Annotation>
+              </Annotations>
+            </Level>
+          </Hierarchy>
+        </Hierarchies>
+      </Dimension>
+     -->
+    </Dimensions>
+    <MeasureGroups>
+      <MeasureGroup name='Average' table='fact_intyg'>
+        <Measures>
+          <Measure name='Antal intyg' column='ID' aggregator='count' formatString='Standard'/>
+          <Measure name='Genomsnittlig sjukskr. langd' column='TOTAL_DURATION' aggregator='avg' formatString='Standard'/>
+        </Measures>
 
-         <DimensionLinks>
-           <FactLink dimension='Ar'/>
+        <DimensionLinks>
+          <FactLink dimension='Ar'/>
+          <FactLink dimension='Kon'/>
 
-           <ForeignKeyLink foreignKeyColumn='CARE_GIVER_ID' dimension='Vardgivare'/>
-           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
+          <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
+          <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
+          <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
 
-           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
-             <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
-             <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
+        </DimensionLinks>
 
-           </DimensionLinks>
-
-       </MeasureGroup>
-
-       <MeasureGroup name='Max' table='fact_intyg'>
-         <Measures>
-           <Measure name='Max sjukskr. langd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
-         </Measures>
-
-         <DimensionLinks>
-           <FactLink dimension='Ar'/>
-
-           <ForeignKeyLink foreignKeyColumn='CARE_GIVER_ID' dimension='Vardgivare'/>
-           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
-
-           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
-           <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
-           <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
-
-         </DimensionLinks>
-
-       </MeasureGroup>
-
-       <!--
-       <MeasureGroup name='Max' table='fact_intyg'>
-         <Measures>
-           <Measure name='Maximal sjukskr. längd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
-         </Measures>
-
-         <DimensionLinks>
-           <FactLink dimension='Vardenhet'/>
-           <FactLink dimension='Vardgivare'/>
-           <FactLink dimension='Diagnoskod'/>
-           <FactLink dimension='Intygstyp'/>
-           <ForeignKeyLink foreignKeyColumn='SIGNING_DATETIME' dimension='Date'/>
-
-         </DimensionLinks>
-
-       </MeasureGroup>
-       -->
-       <!--<MeasureGroup name='Sum' table='fact_intyg'>
-          <Measures>
-
-          </Measures>
-          <DimensionLinks>
-              <FactLink dimension='Location'/>
-              <FactLink dimension='Date'/>
-              <FactLink dimension='Network'/>
-          </DimensionLinks>
       </MeasureGroup>
+
       <MeasureGroup name='Max' table='fact_intyg'>
-          <Measures>
+        <Measures>
+          <Measure name='Max sjukskr. langd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
+        </Measures>
 
-          </Measures>
-          <DimensionLinks>
-              <FactLink dimension='Location'/>
-              <FactLink dimension='Date'/>
-              <FactLink dimension='Network'/>
-          </DimensionLinks>
+        <DimensionLinks>
+          <FactLink dimension='Ar'/>
+          <FactLink dimension='Kon'/>
+
+          <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
+          <ForeignKeyLink foreignKeyColumn='CERTIFICATE_TYPE' dimension='Intygstyp'/>
+          <ForeignKeyLink foreignKeyColumn='DIAGNOSE_CODE' dimension='Diagnoskod'/>
+
+        </DimensionLinks>
+
       </MeasureGroup>
-      <MeasureGroup name='Count' table='fact_intyg'>
-          <Measures>
-          </Measures>
-          <DimensionLinks>
-              <FactLink dimension='Location'/>
-              <FactLink dimension='Date'/>
-              <FactLink dimension='Network'/>
-          </DimensionLinks>
-      </MeasureGroup>-->
+
     </MeasureGroups>
   </Cube>
 </Schema>

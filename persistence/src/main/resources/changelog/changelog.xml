@@ -90,6 +90,9 @@
       <column name="TOTAL_DURATION" defaultValue="10" type="int">
         <constraints nullable="false" />
       </column>
+      <column name="GENDER" type="varchar(16)">
+        <constraints nullable="false" />
+      </column>
     </createTable>
 
     <sqlFile path="changelog/dim_date_mysql.sql" />
@@ -125,6 +128,9 @@
     </createIndex>
     <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_CERTIFICATE_TYPE">
       <column name="CERTIFICATE_TYPE"></column>
+    </createIndex>
+    <createIndex tableName="fact_intyg" indexName="IDX_FACT_INTYG_GENDER">
+      <column name="GENDER"></column>
     </createIndex>
   </changeSet>
 

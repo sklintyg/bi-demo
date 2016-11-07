@@ -1,0 +1,42 @@
+{
+  "rows": [
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Ar",
+        "Ar"
+      ]
+    },
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Vardgivare",
+        "Vardgivarid"
+      ]
+    }
+  ],
+  "columns": [
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Measures",
+        "Antal intyg"
+      ]
+    },
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Measures",
+        "Genomsnittlig sjukskr. langd"
+      ]
+    },
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Kon",
+        "Kon"
+      ]
+    }
+  ],
+  "filters": []
+}

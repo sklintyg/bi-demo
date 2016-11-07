@@ -128,7 +128,8 @@ dependencies {
     gretty "org.apache.activemq:activemq-client:${activemqVersion}"
     gretty "org.apache.activemq:activemq-broker:${activemqVersion}"
 
-       compile "pentaho:mondrian:4.3.1.8-207"
+    compile "pentaho:mondrian:4.3.1.8-207"
+    compile "org.olap4j:olap4j:1.2.0"
     
 
 

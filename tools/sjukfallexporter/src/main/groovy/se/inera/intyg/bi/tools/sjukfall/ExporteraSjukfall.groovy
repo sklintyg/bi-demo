@@ -80,14 +80,25 @@ class ExporteraSjukfall {
                     def duration = ldate - fdate
                     totalDuration = duration.days
                 }
+
+                String personNummer = it.CIVIC_REGISTRATION_NUMBER
+                int len = personNummer.length();
+                def genderDigit = Integer.parseInt(personNummer.substring(len - 3, len - 2))
+                boolean genderMale = genderDigit % 2 == 1
+                String gender = genderMale ? "M" : "F"
+
+                // Some data produces 2000 year long sickleaves, limit to max 2 years...
+                if (totalDuration > 730) {
+                    totalDuration = 730
+                }
                 lastId = id
 
                 result.append("INSERT INTO fact_intyg (ID,CERTIFICATE_TYPE,PATIENT_BIRTHDATE,CARE_UNIT_ID," +
                         "CARE_UNIT_NAME,CARE_GIVER_ID,SIGNING_DOCTOR_ID,SIGNING_DOCTOR_NAME,DIAGNOSE_CODE,SIGNING_DATETIME," +
-                        "SIGN_YEAR,SIGN_MONTH,SIGN_DAY,TOTAL_DURATION) " +
+                        "SIGN_YEAR,SIGN_MONTH,SIGN_DAY,TOTAL_DURATION,GENDER) " +
                         "VALUES('${it.ID}','${it.CERTIFICATE_TYPE}','${it.CIVIC_REGISTRATION_NUMBER.substring(0, 8)}','${it.CARE_UNIT_ID}'," +
                         "'${it.CARE_UNIT_NAME.replace("'","")}','${it.CARE_GIVER_ID}','${it.SIGNING_DOCTOR_ID.replace("'","")}',''," +
-                        "'${it.DIAGNOSE_CODE.replace("'","")}','${signDateTime}',${year},${month},${day},${totalDuration});\n")
+                        "'${it.DIAGNOSE_CODE.replace("'","")}','${signDateTime}',${year},${month},${day},${totalDuration},'${gender}');\n")
 
 
             } else {
@@ -109,8 +120,11 @@ class ExporteraSjukfall {
         }
 
         result.append('INSERT INTO DIM_ICD (icd_code) SELECT DISTINCT(DIAGNOSE_CODE) FROM FACT_INTYG;\n');
-        result.append('INSERT IGNORE INTO DIM_VARDENHET (HSA_ID,VARDENHET_NAMN) SELECT DISTINCT(CARE_UNIT_ID), CARE_UNIT_NAME FROM FACT_INTYG;\n');
         result.append('INSERT IGNORE INTO DIM_VARDGIVARE (HSA_ID,VARDGIVARE_NAMN) SELECT DISTINCT(CARE_GIVER_ID), \'\' FROM FACT_INTYG;\n');
+
+        result.append('INSERT IGNORE INTO DIM_VARDENHET SELECT CARE_UNIT_ID, CARE_UNIT_NAME, CARE_GIVER_ID FROM fact_intyg ORDER BY CARE_GIVER_ID, CARE_UNIT_NAME;\n');
+        // result.append('INSERT IGNORE INTO DIM_VARDENHET (HSA_ID,VARDENHET_NAMN) SELECT DISTINCT(CARE_UNIT_ID), CARE_UNIT_NAME FROM FACT_INTYG;\n');
+
 
         //println " -------- \n ${result.toString()} \n--------"
 

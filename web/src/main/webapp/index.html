@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="sv" id="ng-app" ng-app="biIndexApp">
+
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width">
+
+<base href="/">
+<title>Intyg - Business Intelligence</title>
+
+<!-- bower:css -->
+<link rel="stylesheet" href="/bower_components/angular-ui-select/dist/select.css" />
+<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+<!-- endbower -->
+<link rel="stylesheet" href="/css/inera-webcert.css">
+<link rel="stylesheet" href="/css/inera-certificate.css">
+
+</head>
+<style>
+  html, body {
+    height: 100%;
+    margin: 4px;
+    padding: 0px;
+  }
+
+</style>
+
+<body class="index-page" ng-controller="IndexController">
+
+  <div class="index-content-container">
+
+    <!-- header part -->
+    <div class="index-header-section">
+
+      <div class="row">
+        <div class="col-sm-6">
+          <h1 class="page-title">Välkommen till Intyg BI</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="col-sm-3 col-md-2 sidebar">
+      <ul class="nav nav-sidebar" ng-repeat="dim in dimensions" >
+        <li class="active"><a href="#">{{ dim.name }}</a></li>
+        <ul class="nav-sidebar" ng-repeat="sub in dim.children">
+          <li><a href="#">{{ sub.name }}</a></li>
+
+          <!-- last hardcoded recursion, replace this with template -->
+
+            <ul class="nav-sidebar" ng-repeat="sub2 in sub.children">
+              <li><a href="#">{{ sub2.name }}</a></li>
+
+              <ul class="nav-sidebar" ng-repeat="sub3 in sub2.children">
+                <li>
+
+                  <div>{{ sub3.name }}
+                    <a href="#" ng-click="addColumn(sub3)">Col</a>
+                    <a href="#" ng-click="addRow(sub3)">Row</a>
+                  </div>
+                </li>
+              </ul>
+
+            </ul>
+
+        </ul>
+      </ul>
+    </div>
+    <div class="col-sm-9 col-md-10">
+      <div class="row">
+        <div class="col-md-2">
+            Rows
+        </div>
+        <div class="col-md-2">
+             Columns
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-2">
+          {{ rows }}
+        </div>
+        <div class="col-md-2">
+          {{ columns }}
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-success" ng-click="doQuery();">Run query</button>
+        </div>
+      </div>
+      <pre>
+        {{ resultData }}
+      </pre>
+    </div>
+  </div>
+
+  <!-- bower:js -->
+  <script type="text/javascript" src="/bower_components/jquery/jquery.js"></script>
+  <script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-animate/angular-animate.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-cookies/angular-cookies.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-i18n/angular-locale_sv-se.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script type="text/javascript" src="/bower_components/api-check/dist/api-check.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-formly/dist/formly.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+  <script type="text/javascript" src="/bower_components/angular-ui-select/dist/select.js"></script>
+  <script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script type="text/javascript" src="/bower_components/momentjs/moment.js"></script>
+  <!-- endbower -->
+
+  <script type="text/javascript" src="index-app.main.js"></script>
+</body>
+</html>
