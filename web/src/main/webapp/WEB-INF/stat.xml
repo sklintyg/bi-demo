@@ -1,0 +1,213 @@
+<?xml version='1.0'?>
+<!--
+
+    Copyright (C) 2016 Inera AB (http://www.inera.se)
+
+    This file is part of bi (https://github.com/sklintyg/bi).
+
+    bi is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    bi is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<Schema name='Intygsprojektet BI' metamodelVersion='4.0'>
+  <PhysicalSchema>
+    <Table name='fact_sjukfall'>
+      <Key>
+        <Column name='startdate'/>         <!-- todo fix when we have ID -->
+      </Key>
+    </Table>
+
+    <Table name="dim_age">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+
+    <Table name="dim_gender">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+
+    <Table name="dim_date">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+    <Table name="dim_enheter">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+    <Table name="dim_lan">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+    <Table name="dim_sjukfalllakare">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+    <Link target='dim_sjukfalllakare' source='dim_age'>
+      <ForeignKey>
+        <Column name='age'/>
+      </ForeignKey>
+    </Link>
+
+    <Link target='dim_sjukfalllakare' source='dim_gender'>
+      <ForeignKey>
+        <Column name='gender'/>
+      </ForeignKey>
+    </Link>
+
+    <Table name="dim_sjukskrivningsgrad">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+<!--
+    <Link target='dim_vardenhet' source='dim_vardgivare'>
+      <ForeignKey>
+        <Column name='VARDGIVARE_ID'/>
+      </ForeignKey>
+    </Link>
+-->
+  </PhysicalSchema>
+
+  <Cube name='Stat' defaultMeasure='Antal sjukfall'>
+    <Dimensions>
+
+      <Dimension name="Alder" table="dim_age" key="Ar">
+        <Attributes>
+          <Attribute name='Ar' hasHierarchy='true' caption="Ålder år" orderByColumn="id">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='text'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <Dimension name="Lan" table="dim_lan" key="Lan">
+        <Attributes>
+          <Attribute name='Lan' hasHierarchy='true' caption="Län">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='text'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <Dimension name="Lakare" table="dim_sjukfalllakare" key="HsaId">
+        <Attributes>
+          <Attribute name='HsaId' hasHierarchy='true' caption="hsa-id">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='hsaid'/>
+            </Name>
+          </Attribute>
+          <Attribute name='Alder' hasHierarchy='true' caption="Ålder">
+            <Key>
+              <Column name="age"/>
+            </Key>
+            <Name>
+              <Column table="dim_age" name='text'/>
+            </Name>
+          </Attribute>
+          <Attribute name='Kon' hasHierarchy='true' caption="Kön">
+            <Key>
+              <Column name="gender"/>
+            </Key>
+            <Name>
+              <Column table="dim_gender" name='text'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <!--
+      <Dimension name="Datum" table="dim_date" key="Datum">
+        <Attributes>
+          <Attribute name='Datum' hasHierarchy='true' caption="Datum">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='date'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+      -->
+
+      <Dimension name="Kon" table="dim_gender" key="Kon">
+        <Attributes>
+          <Attribute name='Kon' hasHierarchy='true' caption="Kön">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='text'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <Dimension name="Sjukskrivningsgrad" table="dim_sjukskrivningsgrad" key="Dagar">
+        <Attributes>
+          <Attribute name='Dagar' hasHierarchy='true' caption="Dagar">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name='text'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+    </Dimensions>
+
+
+    <MeasureGroups>
+      <MeasureGroup name='Standard' table='fact_sjukfall'>
+        <Measures>
+          <Measure name='Antal sjukfall' column='startdate' aggregator='count' formatString='Standard'/>     <!-- FIXA id här -->
+          <Measure name='Genomsnittl sjukskrivningslangd' column='length' aggregator='avg' formatString='Standard'/>
+        </Measures>
+
+        <DimensionLinks>
+          <ForeignKeyLink foreignKeyColumn='gender' dimension='Kon'/>
+          <ForeignKeyLink foreignKeyColumn='age' dimension='Alder'/>
+          <ForeignKeyLink foreignKeyColumn='lan' dimension='Lan'/>
+          <ForeignKeyLink foreignKeyColumn='lakare' dimension='Lakare'/>
+         <!-- <ForeignKeyLink foreignKeyColumn='startdate' dimension='Datum'/>    -->
+          <ForeignKeyLink foreignKeyColumn='sjukskrivningsgrad' dimension='Sjukskrivningsgrad'/>
+        </DimensionLinks>
+      </MeasureGroup>
+    </MeasureGroups>
+  </Cube>
+</Schema>

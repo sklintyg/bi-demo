@@ -21,6 +21,7 @@ package se.inera.intyg.bi.persistence.config;
 import liquibase.integration.spring.SpringLiquibase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -37,13 +38,16 @@ public class PersistenceConfigJndi extends PersistenceConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceConfigJndi.class);
 
+    @Value("${db.jndi}")
+    private String jndiName = "jdbc/bi";
+
     // CHECKSTYLE:OFF EmptyBlock
     @Bean
     DataSource jndiDataSource() {
         DataSource dataSource = null;
         JndiTemplate jndi = new JndiTemplate();
         try {
-            dataSource = (DataSource) jndi.lookup("jdbc/bi");       // java:comp/env/
+            dataSource = (DataSource) jndi.lookup(jndiName);
         } catch (NamingException e) {
             LOG.error("Error getting DataSource from JNDI: " + e.getMessage());
         }

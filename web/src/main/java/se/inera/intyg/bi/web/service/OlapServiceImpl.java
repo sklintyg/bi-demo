@@ -48,8 +48,8 @@ import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -61,8 +61,19 @@ public class OlapServiceImpl implements OlapService {
 
     public static final String DATABASE_NAME = "Provider=Mondrian;DataSource=Intyg;";
     public static final String CATALOG_NAME = "Intyg";
+    public static final String MEASURES = "Measures";
+    public static final String DIMENSIONS = "Dimensions";
 
     private OlapConnection olapConnection;
+
+    @Value("${olap.database.name}")
+    private String olapDatabaseName = DATABASE_NAME;
+
+    @Value("${olap.catalog.name}")
+    private String olapCatalogName = CATALOG_NAME;
+
+    @Value("${olap.cube.name}")
+    private String olapCubeName = CATALOG_NAME;
 
     @Value("${datasources.xml.file}")
     private String dataSourcesFile;
@@ -78,7 +89,7 @@ public class OlapServiceImpl implements OlapService {
                         new IdentityCatalogLocator());
 
         try {
-            olapConnection = server.getConnection(DATABASE_NAME, CATALOG_NAME, null);
+            olapConnection = server.getConnection(olapDatabaseName, olapCatalogName, null);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,19 +100,20 @@ public class OlapServiceImpl implements OlapService {
     @Override
     public CubeModel getCubeModel() {
         try {
-            Cube cube = olapConnection.getOlapSchema().getCubes().get("Intyg");
+            Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
 
             CubeModel cm = new CubeModel();
             // Dimensions
             NamedList<Dimension> dimList = cube.getDimensions();
 
-            DimensionModel measures = new DimensionModel("Measures");
+            DimensionModel measures = new DimensionModel(MEASURES);
+            DimensionModel dimensions = new DimensionModel(DIMENSIONS);
 
             for (Dimension d : dimList) {
                 if (!d.isVisible()) {
                     continue;
                 }
-                if (d.getName().equals("Measures")) {
+                if (d.getName().equals(MEASURES)) {
 
                     for (Member member : d.getDefaultHierarchy().getRootMembers()) {
                         if (!member.isVisible()) {
@@ -114,12 +126,12 @@ public class OlapServiceImpl implements OlapService {
 
             }
 
-            DimensionModel dimensions = new DimensionModel("Dimensions");
+
             for (Dimension d : dimList) {
                 if (!d.isVisible()) {
                     continue;
                 }
-                if (!d.getName().equals("Measures")) {
+                if (!d.getName().equals(MEASURES)) {
                     DimensionModel model = new DimensionModel(d.getName());
                     for (Hierarchy hierarchy : d.getHierarchies()) {
                         if (!hierarchy.isVisible()) {
@@ -166,30 +178,28 @@ public class OlapServiceImpl implements OlapService {
     }
 
     @Override
-    public String toMdx(QueryModel queryModel) {
+    public List<String> getDimensionValues(DimensionEntry dimensionEntry) {
+        List<String> list = new ArrayList<>();
 
         try {
-            Cube cube = olapConnection.getOlapSchema().getCubes().get("Intyg");
-            Query q = new Query("Intyg", cube);
+            Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
+            Query q = new Query(olapCubeName, cube);
+            QueryDimension rootDimension = q.getDimension(dimensionEntry.nth(0));
 
-            buildQueryDimensions(queryModel, cube, q);
-            q.validate();
+            NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
+            for (Hierarchy hierarchy : hierarchies) {
+                for (Level l : hierarchy.getLevels()) {
+                    if (l.getUniqueName().equals(dimensionEntry.toString())) {
+                        list.addAll(l.getMembers().stream().map(m -> m.getName()).collect(Collectors.toList()));
+                    }
+                }
+            }
 
-            return q.getSelect().toString();
+            return list;
         } catch (OlapException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    @Override
-    public Cube getCube(String name) {
-        try {
-            return olapConnection.getOlapSchema().getCubes().get("Intyg");
-        } catch (OlapException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -197,73 +207,19 @@ public class OlapServiceImpl implements OlapService {
     @Override
     public CellSet executeQuery(QueryModel queryModel) {
         try {
-            Cube cube = olapConnection.getOlapSchema().getCubes().get("Intyg");
-            Query q = new Query("Intyg", cube);
+            Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
+            Query q = new Query(olapCubeName, cube);
 
-            // First, handle dimensions for COLUMNS
+            // Now we start building the actual Olap4j query model.
             for (DimensionEntry col : queryModel.getColumns()) {
-                // Always always start by getting hold of the root dimension.
-                String root = col.nth(0);
-
-                // The root must _always_ map to a dimension, otherwise we're out of here.
-                QueryDimension rootDimension = q.getDimension(root);
-                if (rootDimension == null) {
-                    throw new IllegalArgumentException("Unknown root col dimension: " + root);
-                }
-
-                NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
-                for (Hierarchy hierarchy : hierarchies) {
-                    for (Level l : hierarchy.getLevels()) {
-                        if (l.getUniqueName().equals(col.toString())) {
-                            // Add this level
-
-                            rootDimension.include(l);
-
-                        }
-                    }
-                }
-                q.getAxis(Axis.COLUMNS).addDimension(rootDimension);
+                buildQueryAxis(q, col, Axis.COLUMNS);
             }
-
 
             for (DimensionEntry row : queryModel.getRows()) {
-                // Always always start by getting hold of the root dimension.
-                String root = row.nth(0);
-
-                // The root must _always_ map to a dimension, otherwise we're out of here.
-                QueryDimension rootDimension = q.getDimension(root);
-                if (rootDimension == null) {
-                    throw new IllegalArgumentException("Unknown root row dimension: " + root);
-                }
-
-                NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
-                for (Hierarchy hierarchy : hierarchies) {
-                    for (Level l : hierarchy.getLevels()) {
-                        if (l.getUniqueName().equals(row.toString())) {
-                            // Add this level
-                            rootDimension.include(l);
-
-                        }
-                    }
-                }
-                q.getAxis(Axis.ROWS).addDimension(rootDimension);
+                buildQueryAxis(q, row, Axis.ROWS);
             }
 
-           // q.getAxis(axis).addDimension(dimension);
 
-
-
-            //buildQueryDimensions(queryModel, cube, q);
-
-            // Always add filter on vardgivare...
-            // QueryDimension vardgivare = q.getDimension("Vardgivare");
-
-            // TODO Kom ihåg - nedanstående räcker inte för att enbart få med vårdenheter under angiven vårdgivare.
-            // Vi måste antingen lägga till vgId som attribut på vårdenhet, alternativt kanske slå samma vg och ve till en gemensam hierarki
-            // där ve är underordnat vg på ett annat vis. Hur nu man gör det...
-            // vardgivare.include(cube.lookupMember(IdentifierNode.ofNames("Vardgivare", "Vardgivarid", "SE162321000255-O00001").getSegmentList()));
-            // q.getAxis(Axis.FILTER).addDimension(vardgivare);
-           // q.getAxis(Axis.ROWS).addDimension(vardgivare);
 
             q.validate();
 
@@ -276,55 +232,71 @@ public class OlapServiceImpl implements OlapService {
         }
     }
 
-    private void buildQueryDimensions(QueryModel queryModel, Cube cube, Query q) throws OlapException {
 
-        setupDimension(q, queryModel.getColumns(), Axis.COLUMNS);
-        setupDimension(q, queryModel.getRows(), Axis.ROWS);
+    private void buildQueryAxis(Query q, DimensionEntry dimensionEntry, Axis axis) throws OlapException {
+        // Always always start by getting hold of the root dimension.
+        String root = dimensionEntry.nth(0);
 
+        // The root must _always_ map to a dimension, otherwise we're out of here.
+        QueryDimension rootDimension = q.getDimension(root);
+        if (rootDimension == null) {
+            throw new IllegalArgumentException("Unknown root row dimension: " + root);
+        }
 
+        if (rootDimension.getDimension().getUniqueName().equals("[" + MEASURES + "]")) {
+            // Measures are handled through members
+            buildQueryMeasure(dimensionEntry, rootDimension);
+        } else {
+            // Dimensions are handled through hierarchy -> levels
+            buildQueryDimension(dimensionEntry, rootDimension);
+        }
+        if (!isPresentOnAxis(q, axis, rootDimension)) {
+            q.getAxis(axis).addDimension(rootDimension);
+        }
 
+        q.getAxis(axis).setNonEmpty(true);
     }
 
-    private void setupDimension(Query q, List<DimensionEntry> row, Axis axis) throws OlapException {
-
-        // Gruppera per rotdimension
-        Map<String, List<DimensionEntry>> perRoot = row.stream().collect(Collectors.groupingBy(dim -> dim.nth(0)));
-
-        for (Map.Entry<String, List<DimensionEntry>> entry : perRoot.entrySet()) {
-            QueryDimension dimension = q.getDimension(entry.getKey());
-
-            if (entry.getKey().equals("Measures")) {
-                handleMeasures(entry, dimension);
-            } else {
-                handleDimensions(entry, dimension);
+    private boolean isPresentOnAxis(Query q, Axis axis, QueryDimension rootDimension) {
+        for (QueryDimension qd : q.getAxis(axis).getDimensions()) {
+            if (qd.getName().equals(rootDimension.getName())) {
+                return true;
             }
-            q.getAxis(axis).addDimension(dimension);
+        }
+        return false;
+    }
+
+    private void buildQueryMeasure(DimensionEntry dimensionEntry, QueryDimension rootDimension) throws OlapException {
+        NamedList<Member> rootMembers = rootDimension.getDimension().getDefaultHierarchy().getRootMembers();
+        for (Member m : rootMembers) {
+            if (m.getUniqueName().equals(dimensionEntry.toString())) {
+                rootDimension.include(Selection.Operator.MEMBER, m);
+            }
         }
     }
 
-    private void handleDimensions(Map.Entry<String, List<DimensionEntry>> entry, QueryDimension dimension) throws OlapException {
-        for (DimensionEntry dimensionEntry : entry.getValue()) {
-            if (dimension != null && dimension.getDimension() != null && dimension.getDimension().getHierarchies() != null) {
+    private void buildQueryDimension(DimensionEntry dimensionEntry, QueryDimension rootDimension) throws OlapException {
+        NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
+        for (Hierarchy hierarchy : hierarchies) {
 
-                NamedList<Hierarchy> hierarchies = dimension.getDimension().getHierarchies();
-                for (Hierarchy h : hierarchies) {
-                    if (h.getName().equalsIgnoreCase((dimensionEntry.nth(1)))) {
-                        dimension.include( dimensionEntry.getOperator(), h.getDefaultMember());
+            for (Level l : hierarchy.getLevels()) {
+
+                // If our dimensionEntry contains values, we must use those...
+                if (dimensionEntry.getFilterValues().size() > 0) {
+                    List<Member> members = l.getMembers();
+                    for (DimensionEntry valueEntry : dimensionEntry.getFilterValues()) {
+                        for (Member member : members) {
+                            if (member.getUniqueName().equals(valueEntry.toString())) {
+                                rootDimension.include(member);
+                            }
+                        }
                     }
-                }
-            }
-
-        }
-    }
-
-    private void handleMeasures(Map.Entry<String, List<DimensionEntry>> entry, QueryDimension dimension) throws OlapException {
-        for (DimensionEntry dimensionEntry : entry.getValue()) {
-            NamedList<Member> rootMembers = dimension.getDimension().getDefaultHierarchy().getRootMembers();
-            for (Member m : rootMembers) {
-                if (dimensionEntry.nth(1).contains(m.getName())) {
-                    dimension.include(Selection.Operator.MEMBER, m);
+                // Otherwise, try to add the entry normall as Datum.Datum.Ar or Datum.Datum.(All) or similar...
+                } else if (l.getUniqueName().equals(dimensionEntry.toString())) {
+                    rootDimension.include(l);
                 }
             }
         }
     }
+
 }

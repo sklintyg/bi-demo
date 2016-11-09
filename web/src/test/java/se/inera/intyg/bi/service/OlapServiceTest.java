@@ -35,6 +35,7 @@ import se.inera.intyg.bi.web.service.dto.DimensionEntry;
 import se.inera.intyg.bi.web.service.dto.QueryModel;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -57,16 +58,10 @@ public class OlapServiceTest {
     }
 
     @Test
-    public void testValidateQuery() {
-
-        QueryModel queryModel = new QueryModel();
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Ar", "Ar"));
-        //        queryModel.getFilters().add(new FilterEntry("Ar", "2014"));
-
-        String mdx = testee.toMdx(queryModel);
-        System.out.println("\n\n" + mdx + "\n\n");
-        assertNotNull(mdx);
+    public void testGetDimensionValues() {
+        DimensionEntry dimEntry = new DimensionEntry(null, "Datum", "Datum", "Ar");
+        List<String> dimensionValues = testee.getDimensionValues(dimEntry);
+        assertTrue(dimensionValues.size() > 0);
     }
 
     @Test
@@ -74,12 +69,32 @@ public class OlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-      //  queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal intyg"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskr. langd"));
+        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskrivningslangd"));
         queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Intygstyp","Typ", "Typ"));
 
         queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Ar", "Ar", "Ar"));
+        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar"));
+
+        CellSet cellSet = testee.executeQuery(queryModel);
+        CellSetFormatter csf = new RectangularCellSetFormatter(false);
+        csf.format(cellSet, new PrintWriter(System.out, true));
+        assertNotNull(cellSet);
+    }
+
+    @Test
+    public void testExecuteQueryWithFilter() {
+
+        QueryModel queryModel = new QueryModel();
+
+        DimensionEntry konDimension = new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon");
+        konDimension.getFilterValues().add(new DimensionEntry(null, "Kon", "Kon", "F"));
+
+        DimensionEntry arDimension = new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar");
+        arDimension.getFilterValues().add(new DimensionEntry(null, "Datum", "Datum", "2013"));
+        arDimension.getFilterValues().add(new DimensionEntry(null, "Datum", "Datum", "2014"));
+
+        queryModel.getRows().add(konDimension);
+        queryModel.getColumns().add(arDimension);
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);

@@ -32,6 +32,9 @@ public class DimensionEntry {
     private Selection.Operator operator = Selection.Operator.MEMBER;
     private List<String> parts = new ArrayList<>();
 
+    // TODO use some kind of interface here so we don't allow values within values.
+    private List<DimensionEntry> filterValues = new ArrayList<>();
+
     public DimensionEntry() {
 
     }
@@ -68,7 +71,24 @@ public class DimensionEntry {
         return buf.toString();
     }
 
-//    public String first() {
+    public String nonLeaf() {
+        StringBuilder buf = new StringBuilder();
+        for (int a = 0; a < parts.size() - 1; a++) {
+            buf.append(parts.get(a)).append(".");
+        }
+        buf.setLength(buf.length() - 1);
+        return buf.toString();
+    }
+
+    public List<DimensionEntry> getFilterValues() {
+        return filterValues;
+    }
+
+    public void setFilterValues(List<DimensionEntry> filterValues) {
+        this.filterValues = filterValues;
+    }
+
+    //    public String first() {
 //        return parts.get(0);
 //    }
 //

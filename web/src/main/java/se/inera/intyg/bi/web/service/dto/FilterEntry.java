@@ -18,23 +18,43 @@
  */
 package se.inera.intyg.bi.web.service.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by eriklupander on 2016-11-03.
  */
 public class FilterEntry {
-    private final String key;
-    private final String value;
 
-    public FilterEntry(String key, String value) {
-        this.key = key;
-        this.value = value;
+    public enum SelectionAxis {
+        ROW, COLUMN
     }
 
-    public String getKey() {
-        return key;
+    private SelectionAxis axis;
+    private DimensionEntry filterDimension;
+    private List<DimensionEntry> filterValues = new ArrayList<>();
+
+    public SelectionAxis getAxis() {
+        return axis;
     }
 
-    public String getValue() {
-        return value;
+    public void setAxis(SelectionAxis axis) {
+        this.axis = axis;
+    }
+
+    public DimensionEntry getFilterDimension() {
+        return filterDimension;
+    }
+
+    public void setFilterDimension(DimensionEntry filterDimension) {
+        this.filterDimension = filterDimension;
+    }
+
+    public List<DimensionEntry> getFilterValues() {
+        return filterValues;
+    }
+
+    public void setFilterValues(List<DimensionEntry> filterValues) {
+        this.filterValues = filterValues;
     }
 }

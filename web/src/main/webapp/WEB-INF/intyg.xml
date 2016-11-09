@@ -66,12 +66,12 @@
 
       <Dimension name='Intygstyp' table='dim_intygstyp' key="Typ">
         <Attributes>
-          <Attribute name='Typ' keyColumn='typ' hasHierarchy='true'/>
+          <Attribute name='Typ' keyColumn='typ' hasHierarchy='true'  caption="Intygstyp"/>
         </Attributes>
       </Dimension>
       <Dimension name='Diagnoskod' table='dim_icd' key="ICD_CODE">
         <Attributes>
-          <Attribute name='ICD_CODE' keyColumn='ICD_CODE' hasHierarchy='true'/>
+          <Attribute name='ICD_CODE' keyColumn='ICD_CODE' hasHierarchy='true'  caption="ICD-kod"/>
         </Attributes>
       </Dimension>
 
@@ -79,33 +79,40 @@
       <Dimension name='Vardenhet' table='dim_vardenhet' key="VardenhetId">
         <Attributes>
 
-          <Attribute name="VardgivareId" keyColumn="HSA_ID" table="dim_vardgivare" hasHierarchy='true' visible="false"></Attribute>
+          <Attribute name="VardgivareId" keyColumn="HSA_ID" table="dim_vardgivare" hasHierarchy='true' visible="false"  caption="Vårdgivar-id"></Attribute>
 
-          <Attribute name='VardenhetId' table='dim_vardenhet' keyColumn='HSA_ID' hasHierarchy='false'/>
+          <Attribute name='VardenhetId' table='dim_vardenhet' keyColumn='HSA_ID' hasHierarchy='false'  caption="Vårdenhets-id"/>
 
-          <Attribute name='Vardenhetsnamn' table='dim_vardenhet' hasHierarchy='false' orderByColumn="VARDENHET_NAMN"
+          <Attribute name='Vardenhetsnamn' table='dim_vardenhet' hasHierarchy='false' orderByColumn="VARDENHET_NAMN"  caption="Vårdenhetsnamn"
               keyColumn='HSA_ID' nameColumn='VARDENHET_NAMN'/>
 
         </Attributes>
 
         <Hierarchies>
           <Hierarchy name='Vardenheter'>
-            <Level attribute='VardgivareId'/>
-            <Level attribute='Vardenhetsnamn'/>
-            <Level attribute='VardenhetId'/>
+            <Level caption="Vårdgivar-id" attribute='VardgivareId'/>
+            <Level caption="Vårdenhetsnamn" attribute='Vardenhetsnamn'/>
+            <Level caption="Vårdenhet-id" attribute='VardenhetId'/>
           </Hierarchy>
         </Hierarchies>
       </Dimension>
 
-      <Dimension name='Ar' table='fact_intyg' key="Ar">
+      <Dimension name='Datum' table='fact_intyg' key="Ar">
         <Attributes>
-          <Attribute name='Ar' keyColumn='SIGN_YEAR' hasHierarchy='true'/>
+          <Attribute name='Ar' keyColumn='SIGN_YEAR' hasHierarchy='false'  caption="År"/>
+          <Attribute name='Manad' keyColumn='SIGN_MONTH' hasHierarchy='false'  caption="Månad"/>
         </Attributes>
+        <Hierarchies>
+          <Hierarchy name='Datum'>
+            <Level attribute='Ar'/>
+            <Level attribute='Manad'/>
+          </Hierarchy>
+        </Hierarchies>
       </Dimension>
 
       <Dimension name="Kon" table="fact_intyg" key="Kon">
         <Attributes>
-          <Attribute name='Kon' keyColumn='GENDER' hasHierarchy='true'/>
+          <Attribute name='Kon' keyColumn='GENDER' hasHierarchy='true' caption="Kön"/>
         </Attributes>
       </Dimension>
 
@@ -174,11 +181,11 @@
       <MeasureGroup name='Average' table='fact_intyg'>
         <Measures>
           <Measure name='Antal intyg' column='ID' aggregator='count' formatString='Standard'/>
-          <Measure name='Genomsnittlig sjukskr. langd' column='TOTAL_DURATION' aggregator='avg' formatString='Standard'/>
+          <Measure name='Genomsnittlig sjukskrivningslangd' column='TOTAL_DURATION' aggregator='avg' formatString='Standard'/>
         </Measures>
 
         <DimensionLinks>
-          <FactLink dimension='Ar'/>
+          <FactLink dimension='Datum'/>
           <FactLink dimension='Kon'/>
 
           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>
@@ -191,11 +198,11 @@
 
       <MeasureGroup name='Max' table='fact_intyg'>
         <Measures>
-          <Measure name='Max sjukskr. langd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
+          <Measure name='Max sjukskrivningslangd' column='TOTAL_DURATION' aggregator='max' formatString='Standard'/>
         </Measures>
 
         <DimensionLinks>
-          <FactLink dimension='Ar'/>
+          <FactLink dimension='Datum'/>
           <FactLink dimension='Kon'/>
 
           <ForeignKeyLink foreignKeyColumn='CARE_UNIT_ID' dimension='Vardenhet'/>

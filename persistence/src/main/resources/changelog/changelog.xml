@@ -134,4 +134,8 @@
     </createIndex>
   </changeSet>
 
+  <changeSet id="4" author="el">
+    <sqlFile path="changelog/stat.sql"/>
+  </changeSet>
+
 </databaseChangeLog>

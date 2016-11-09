@@ -28,7 +28,6 @@ public class QueryModel {
 
     private List<DimensionEntry> rows = new ArrayList<>();
     private List<DimensionEntry> columns = new ArrayList<>();
-    private List<FilterEntry> filters = new ArrayList<>();
 
     public List<DimensionEntry> getRows() {
         return rows;
@@ -44,13 +43,5 @@ public class QueryModel {
 
     public void setColumns(List<DimensionEntry> columns) {
         this.columns = columns;
-    }
-
-    public List<FilterEntry> getFilters() {
-        return filters;
-    }
-
-    public void setFilters(List<FilterEntry> filters) {
-        this.filters = filters;
     }
 }

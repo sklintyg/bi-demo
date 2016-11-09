@@ -29,11 +29,24 @@
 
   <bean class="se.inera.intyg.bi.web.service.OlapServiceImpl"/>
 
-  <bean name="props" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-    <property name="locations">
-      <list>
-        <value>classpath:bi.properties</value>
-      </list>
-    </property>
-  </bean>
+  <beans profile="!stat">
+    <bean name="props" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>classpath:bi.properties</value>
+        </list>
+      </property>
+    </bean>
+  </beans>
+
+  <beans profile="stat">
+    <bean name="props-stat" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+      <property name="locations">
+        <list>
+          <value>classpath:st.properties</value>
+        </list>
+      </property>
+    </bean>
+  </beans>
+
 </beans>

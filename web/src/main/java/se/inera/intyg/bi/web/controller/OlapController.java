@@ -29,18 +29,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import se.inera.intyg.bi.web.service.OlapService;
 import se.inera.intyg.bi.web.service.dto.CubeModel;
+import se.inera.intyg.bi.web.service.dto.DimensionEntry;
 import se.inera.intyg.bi.web.service.dto.QueryModel;
 
-import javax.ws.rs.core.Response;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.List;
 
 /**
  * Created by eriklupander on 2016-10-30.
  */
 @RestController
 @RequestMapping("/api")
-public class MdxController {
+public class OlapController {
 
     @Autowired
     OlapService olapService;
@@ -52,7 +53,7 @@ public class MdxController {
         return result;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/model", produces = "text/plain")
+    @RequestMapping(method = RequestMethod.POST, value = "/model", produces = "text/plain;charset=UTF-8")
     public String query(@RequestBody QueryModel queryModel) {
         CellSet cellSet = olapService.executeQuery(queryModel);
         StringWriter sw = new StringWriter();
@@ -71,12 +72,11 @@ public class MdxController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/mdx/model", produces = "application/json")
-    public Response getMdx() {
-        String json = olapService.toMdx(new QueryModel());
-        return Response.ok()
-                .entity(json)
-                .build();
-    }
+    @RequestMapping(method = RequestMethod.POST, value = "/mdx/dimension/values", produces = "application/json")
+    public List<String> getDimensionValues(@RequestBody String uniqueName) {
+        DimensionEntry dimEntry = new DimensionEntry(null, uniqueName.split("\\."));
+        List<String> dimensionValues = olapService.getDimensionValues(dimEntry);
 
+        return dimensionValues;
+    }
 }

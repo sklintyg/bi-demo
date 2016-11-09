@@ -1,0 +1,3 @@
+CREATE USER 'st'@'localhost' IDENTIFIED BY 'st';
+GRANT ALL PRIVILEGES ON * . * TO 'st'@'localhost';
+CREATE DATABASE 'st' /*!40100 DEFAULT CHARACTER SET utf8 */;

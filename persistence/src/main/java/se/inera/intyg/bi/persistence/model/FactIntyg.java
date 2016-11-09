@@ -21,16 +21,14 @@ package se.inera.intyg.bi.persistence.model;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 /**
  * Created by eriklupander on 2016-10-26.
  */
-@Entity
-@Table(name = "fact_intyg")
+// @Entity
+//@Table(name = "fact_intyg")
 public class FactIntyg {
 
     /**

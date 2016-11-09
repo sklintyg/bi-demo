@@ -41,23 +41,49 @@
     </div>
   </div>
   <div class="container-fluid">
-    <div class="col-sm-3 col-md-2 sidebar">
+    <div class="col-md-3 sidebar">
+      <ul class="nav nav-sidebar" ng-repeat="measure in measures" >
+        <li class="active"><a href="#">{{ measure.name }}</a></li>
+        <ul class="nav-sidebar" ng-repeat="sub in measure.children">
+          <li> {{ sub.name }}
+            <span ng-if="sub.children.length == 0">
+                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Col</a>
+                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Row</a>
+            </span>
+          </li>
+        </ul>
+      </ul>
+
       <ul class="nav nav-sidebar" ng-repeat="dim in dimensions" >
         <li class="active"><a href="#">{{ dim.name }}</a></li>
-        <ul class="nav-sidebar" ng-repeat="sub in dim.children">
-          <li><a href="#">{{ sub.name }}</a></li>
 
-          <!-- last hardcoded recursion, replace this with template -->
+        <ul class="nav-sidebar" ng-repeat="sub in dim.children">
+          <li> {{ sub.name }}
+            <span ng-if="sub.children.length == 0">
+                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Col</a>
+                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Row</a>
+            </span>
+          </li>
+
+          <!-- almost last hardcoded recursion, replace this with template -->
 
             <ul class="nav-sidebar" ng-repeat="sub2 in sub.children">
-              <li><a href="#">{{ sub2.name }}</a></li>
+              <li> {{ sub2.name }}
+                <span ng-if="sub2.children.length == 0">
+                    <a href="#" ng-click="addColumn(sub2)" ng-if="available(sub2)">Col</a>
+                    <a href="#" ng-click="addRow(sub2)" ng-if="available(sub2)">Row</a>
+                </span>
+              </li>
 
+              <!-- Last hardcoded recursion, replace this with template -->
               <ul class="nav-sidebar" ng-repeat="sub3 in sub2.children">
                 <li>
 
                   <div>{{ sub3.name }}
-                    <a href="#" ng-click="addColumn(sub3)">Col</a>
-                    <a href="#" ng-click="addRow(sub3)">Row</a>
+                    <span ng-if="sub3.children.length == 0">
+                      <a href="#" ng-click="addColumn(sub3)" ng-if="available(sub3)">Col</a>
+                      <a href="#" ng-click="addRow(sub3)" ng-if="available(sub3)">Row</a>
+                    </span>
                   </div>
                 </li>
               </ul>
@@ -67,31 +93,89 @@
         </ul>
       </ul>
     </div>
-    <div class="col-sm-9 col-md-10">
-      <div class="row">
-        <div class="col-md-2">
-            Rows
-        </div>
-        <div class="col-md-2">
-             Columns
-        </div>
+    <div class="col-md-9">
 
-      </div>
 
       <div class="row">
-        <div class="col-md-2">
-          {{ rows }}
-        </div>
-        <div class="col-md-2">
-          {{ columns }}
+        <div class="col-md-4">
+          <div class="panel panel-primary">
+            <div class="panel-heading">Rows</div>
+            <div class="panel-body">
+              <ul ng-repeat="row in rows">
+                <li>{{ row.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(row, 'ROW');"></span> <span class="glyphicon glyphicon-remove" ng-click="removeRow(row);"></span></li>
+                <ul ng-repeat="fi in row.filterValues">
+                  <li>{{ fi.path }}</li>
+                </ul>
+              </ul>
+            </div>
+          </div>
+
         </div>
         <div class="col-md-4">
+          <div class="panel panel-primary">
+            <div class="panel-heading">Columns</div>
+            <div class="panel-body">
+              <ul ng-repeat="col in columns">
+                <li>{{ col.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(col, 'COLUMN');"></span> <span class="glyphicon glyphicon-remove" ng-click="removeColumn(col);"></span></li>
+                <ul ng-repeat="fi in col.filterValues">
+                    <li>{{ fi.path }}</li>
+                </ul>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        <!--
+        <div class="col-md-4">
+          <div class="panel panel-primary">
+            <div class="panel-heading">Filters</div>
+            <div class="panel-body">
+              <ul ng-repeat="filter in filters">
+                <li>{{ filter }} <span class="glyphicon glyphicon-remove" ng-click="removeFilter(filter);"></span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        -->
+      </div>
+      <div class="row">
+        <div class="col-md-4">
           <button class="btn btn-success" ng-click="doQuery();">Run query</button>
+          <button class="btn btn-info" ng-click="clear();">Clear</button>
         </div>
       </div>
-      <pre>
-        {{ resultData }}
-      </pre>
+          <pre>
+            {{ resultData }}
+          </pre>
+
+    </div>
+  </div>
+
+  <!-- Filter modal -->
+  <div id="filterModal" class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Filtrera</h4>
+        </div>
+        <div class="modal-body">
+          <p>{{ filterName }}</p>
+          <p>
+            <div class="input-group" ng-repeat="filterValue in filterValues">
+
+              <span class="input-group-addon" style="text-align:left;">
+               <input type="checkbox" ng-change="addFilter(filterValue);" aria-label="..." value="{{ filterValue.title }}" ng-model="filterValue.selected">     {{ filterValue.title }}
+              </span>
+
+            </div>
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+        </div>
+      </div>
     </div>
   </div>
 
