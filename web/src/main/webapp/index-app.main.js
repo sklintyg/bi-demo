@@ -339,7 +339,7 @@ angular.module('biIndexApp')
                 method: 'POST',
                 url: '/api/model',
                 data: queryModel,
-                headers: ['accept:text/plain']
+                headers: ['accept:text/plain','content-type: application/json;charset=UTF-8']
             }).success(function(data) {
                 $scope.resultData = '\n' + data.trim().replace(/�/g, ' ');
             }).error(function(data, status) {

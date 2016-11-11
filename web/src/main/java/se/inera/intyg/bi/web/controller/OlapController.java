@@ -62,7 +62,7 @@ public class OlapController {
         return sw.toString();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/mdx/dimensions", produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/mdx/dimensions", produces = "application/json;charset=utf-8")
     public String getDimensions() {
         CubeModel cm = olapService.getCubeModel();
         try {
@@ -72,7 +72,7 @@ public class OlapController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/mdx/dimension/values", produces = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/mdx/dimension/values", produces = "application/json;charset=utf-8")
     public List<String> getDimensionValues(@RequestBody String uniqueName) {
         DimensionEntry dimEntry = new DimensionEntry(null, uniqueName.split("\\."));
         List<String> dimensionValues = olapService.getDimensionValues(dimEntry);

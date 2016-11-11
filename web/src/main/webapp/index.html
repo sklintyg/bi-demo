@@ -23,8 +23,9 @@
     margin: 4px;
     padding: 0px;
   }
+
   .panel-body {
-    padding:8px;
+    padding: 8px;
   }
 
 </style>
@@ -37,9 +38,12 @@
     <div class="index-header-section">
 
       <div class="row">
-        <div class="col-sm-6">
-          <h1 class="page-title">Välkommen till Intyg BI</h1>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+          <h1 class="page-title text-center">Välkommen till Intyg BI</h1>
+
         </div>
+        <div class="col-sm-2 text-right" style="padding-right:28px;"><img src="images/inera-logo.png" width="100"></div>
       </div>
     </div>
   </div>
@@ -48,58 +52,58 @@
       <div class="panel panel-primary">
         <div class="panel-heading">Mått och dimensioner</div>
         <div class="panel-body">
-      <ul class="nav nav-sidebar" ng-repeat="measure in measures" >
-        <li class="active"><b>{{ measure.name }}</b></li>
-        <ul class="nav-sidebar" ng-repeat="sub in measure.children">
-          <li> {{ sub.name }}
+          <ul class="nav nav-sidebar" ng-repeat="measure in measures">
+            <li class="active"><b>{{ measure.name }}</b></li>
+            <ul class="nav-sidebar" ng-repeat="sub in measure.children">
+              <li> {{ sub.name }}
             <span ng-if="sub.children.length == 0">
                 <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Kol</a>
                 <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Rad</a>
             </span>
-          </li>
-        </ul>
-      </ul>
+              </li>
+            </ul>
+          </ul>
 
-      <ul class="nav nav-sidebar" ng-repeat="dim in dimensions" >
-        <li class="active"><b>{{ dim.name }}</b></li>
+          <ul class="nav nav-sidebar" ng-repeat="dim in dimensions">
+            <li class="active"><b>{{ dim.name }}</b></li>
 
-        <ul class="nav-sidebar" ng-repeat="sub in dim.children">
-          <li> {{ sub.name }}
+            <ul class="nav-sidebar" ng-repeat="sub in dim.children">
+              <li> {{ sub.name }}
             <span ng-if="sub.children.length == 0">
                 <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Kol</a>
                 <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Rad</a>
             </span>
-          </li>
+              </li>
 
-          <!-- almost last hardcoded recursion, replace this with template -->
+              <!-- almost last hardcoded recursion, replace this with template -->
 
-            <ul class="nav-sidebar" ng-repeat="sub2 in sub.children">
-              <li> {{ sub2.name }}
+              <ul class="nav-sidebar" ng-repeat="sub2 in sub.children">
+                <li> {{ sub2.name }}
                 <span ng-if="sub2.children.length == 0">
                     <a href="#" ng-click="addColumn(sub2)" ng-if="available(sub2)">Kol</a>
                     <a href="#" ng-click="addRow(sub2)" ng-if="available(sub2)">Rad</a>
                 </span>
-              </li>
+                </li>
 
-              <!-- Last hardcoded recursion, replace this with template -->
-              <ul class="nav-sidebar" ng-repeat="sub3 in sub2.children">
-                <li>
+                <!-- Last hardcoded recursion, replace this with template -->
+                <ul class="nav-sidebar" ng-repeat="sub3 in sub2.children">
+                  <li>
 
-                  <div>{{ sub3.name }}
+                    <div>{{ sub3.name }}
                     <span ng-if="sub3.children.length == 0">
                       <a href="#" ng-click="addColumn(sub3)" ng-if="available(sub3)">Kol</a>
                       <a href="#" ng-click="addRow(sub3)" ng-if="available(sub3)">Rad</a>
                     </span>
-                  </div>
-                </li>
+                    </div>
+                  </li>
+                </ul>
+
               </ul>
 
             </ul>
-
-        </ul>
-      </ul>
-          </div>
+          </ul>
         </div>
+      </div>
     </div>
     <div class="col-md-9">
 
@@ -109,16 +113,19 @@
           <div class="panel panel-primary">
             <div class="panel-heading">Rader</div>
             <div class="panel-body">
-              <ul ng-repeat="row in rows">
+              <ul ng-repeat="row in rows" ng-if="rows.length > 0">
                 <li>{{ row.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(row, 'ROW');"></span>
-                                   <span class="glyphicon glyphicon-remove" ng-click="removeRow(row);"></span>
-                                    <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(row, 'ROW');" ng-if="rows.length > 1"></span>
-                                    <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(row, 'ROW');" ng-if="rows.length > 1"></span>
+                  <span class="glyphicon glyphicon-remove" ng-click="removeRow(row);"></span>
+                  <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(row, 'ROW');"
+                        ng-if="rows.length > 1"></span>
+                  <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(row, 'ROW');"
+                        ng-if="rows.length > 1"></span>
                 </li>
                 <ul ng-repeat="fi in row.filterValues">
                   <li>{{ fi.path }}</li>
                 </ul>
               </ul>
+              <div ng-if="rows.length == 0">Lägg till en rad genom att klicka på "Rad" i vänsterspalten.</div>
             </div>
           </div>
 
@@ -127,15 +134,19 @@
           <div class="panel panel-primary">
             <div class="panel-heading">Kolumner</div>
             <div class="panel-body">
-              <ul ng-repeat="col in columns">
-                <li>{{ col.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(col, 'COLUMN');"></span>
+              <ul ng-repeat="col in columns" ng-if="columns.length > 0">
+                <li>{{ col.path }} <span class="glyphicon glyphicon-filter"
+                                         ng-click="openFilter(col, 'COLUMN');"></span>
                   <span class="glyphicon glyphicon-remove" ng-click="removeColumn(col);"></span>
-                  <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(col, 'COLUMN');" ng-if="columns.length > 1"></span>
-                  <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(col, 'COLUMN');" ng-if="columns.length > 1"></span></li>
+                  <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(col, 'COLUMN');"
+                        ng-if="columns.length > 1"></span>
+                  <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(col, 'COLUMN');"
+                        ng-if="columns.length > 1"></span></li>
                 <ul ng-repeat="fi in col.filterValues">
-                    <li>{{ fi.path }}</li>
+                  <li>{{ fi.path }}</li>
                 </ul>
               </ul>
+              <div ng-if="columns.length == 0">Lägg till en kolumn genom att klicka på "Kol" i vänsterspalten.</div>
             </div>
           </div>
 
@@ -143,14 +154,14 @@
 
       </div>
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <button class="btn btn-success" ng-click="doQuery();">Kör fråga</button>
           <button class="btn btn-primary" ng-click="swapAxes();">Byt axlar</button>
           <button class="btn btn-info" ng-click="clear();">Rensa</button>
-          <input style="padding-left:20px;" type="checkbox" ng-click="doQuery();" ng-model="includeEmpty"> Exkludera tomma celler
+          <input style="padding-left:20px;" type="checkbox" ng-click="doQuery();" ng-model="includeEmpty"> Exkludera
+          tomma celler
         </div>
         <div class="col-md-2">
-
 
 
         </div>
@@ -179,13 +190,14 @@
         <div class="modal-body">
           <p>{{ filterName }}</p>
           <p>
-            <div class="input-group" ng-repeat="filterValue in filterValues">
+          <div class="input-group" ng-repeat="filterValue in filterValues">
 
               <span class="input-group-addon" style="text-align:left;">
-               <input type="checkbox" ng-change="addFilter(filterValue);" aria-label="..." value="{{ filterValue.title }}" ng-model="filterValue.selected">     {{ filterValue.title }}
+               <input type="checkbox" ng-change="addFilter(filterValue);" aria-label="..."
+                      value="{{ filterValue.title }}" ng-model="filterValue.selected">     {{ filterValue.title }}
               </span>
 
-            </div>
+          </div>
           </p>
         </div>
         <div class="modal-footer">
