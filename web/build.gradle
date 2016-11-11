@@ -56,8 +56,8 @@ gretty {
     contextPath = '/'
     logbackConfigFile = "${projectDir}/src/main/resources/logback.xml"
     jvmArgs = [
-        '-Dspring.profiles.active=test',
-        '-Dbi.config.file=' + projectDir + '/src/main/resources/dev.properties',
+        '-Dspring.profiles.active=test,stat',
+        '-Dbi.config.file=' + projectDir + '/src/main/resources/st.properties',
         '-Dcredentials.file=' + projectDir + '/src/main/resources/dev-credentials.properties',
         '-Dbi.resources.folder=/' +projectDir + '/../src/main/resources',
         '-XX:MaxPermSize=256M',

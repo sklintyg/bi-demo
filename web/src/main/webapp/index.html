@@ -23,6 +23,9 @@
     margin: 4px;
     padding: 0px;
   }
+  .panel-body {
+    padding:8px;
+  }
 
 </style>
 
@@ -42,26 +45,29 @@
   </div>
   <div class="container-fluid">
     <div class="col-md-3 sidebar">
+      <div class="panel panel-primary">
+        <div class="panel-heading">Mått och dimensioner</div>
+        <div class="panel-body">
       <ul class="nav nav-sidebar" ng-repeat="measure in measures" >
-        <li class="active"><a href="#">{{ measure.name }}</a></li>
+        <li class="active"><b>{{ measure.name }}</b></li>
         <ul class="nav-sidebar" ng-repeat="sub in measure.children">
           <li> {{ sub.name }}
             <span ng-if="sub.children.length == 0">
-                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Col</a>
-                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Row</a>
+                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Kol</a>
+                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Rad</a>
             </span>
           </li>
         </ul>
       </ul>
 
       <ul class="nav nav-sidebar" ng-repeat="dim in dimensions" >
-        <li class="active"><a href="#">{{ dim.name }}</a></li>
+        <li class="active"><b>{{ dim.name }}</b></li>
 
         <ul class="nav-sidebar" ng-repeat="sub in dim.children">
           <li> {{ sub.name }}
             <span ng-if="sub.children.length == 0">
-                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Col</a>
-                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Row</a>
+                <a href="#" ng-click="addColumn(sub)" ng-if="available(sub)">Kol</a>
+                <a href="#" ng-click="addRow(sub)" ng-if="available(sub)">Rad</a>
             </span>
           </li>
 
@@ -70,8 +76,8 @@
             <ul class="nav-sidebar" ng-repeat="sub2 in sub.children">
               <li> {{ sub2.name }}
                 <span ng-if="sub2.children.length == 0">
-                    <a href="#" ng-click="addColumn(sub2)" ng-if="available(sub2)">Col</a>
-                    <a href="#" ng-click="addRow(sub2)" ng-if="available(sub2)">Row</a>
+                    <a href="#" ng-click="addColumn(sub2)" ng-if="available(sub2)">Kol</a>
+                    <a href="#" ng-click="addRow(sub2)" ng-if="available(sub2)">Rad</a>
                 </span>
               </li>
 
@@ -81,8 +87,8 @@
 
                   <div>{{ sub3.name }}
                     <span ng-if="sub3.children.length == 0">
-                      <a href="#" ng-click="addColumn(sub3)" ng-if="available(sub3)">Col</a>
-                      <a href="#" ng-click="addRow(sub3)" ng-if="available(sub3)">Row</a>
+                      <a href="#" ng-click="addColumn(sub3)" ng-if="available(sub3)">Kol</a>
+                      <a href="#" ng-click="addRow(sub3)" ng-if="available(sub3)">Rad</a>
                     </span>
                   </div>
                 </li>
@@ -92,17 +98,23 @@
 
         </ul>
       </ul>
+          </div>
+        </div>
     </div>
     <div class="col-md-9">
 
 
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="panel panel-primary">
-            <div class="panel-heading">Rows</div>
+            <div class="panel-heading">Rader</div>
             <div class="panel-body">
               <ul ng-repeat="row in rows">
-                <li>{{ row.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(row, 'ROW');"></span> <span class="glyphicon glyphicon-remove" ng-click="removeRow(row);"></span></li>
+                <li>{{ row.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(row, 'ROW');"></span>
+                                   <span class="glyphicon glyphicon-remove" ng-click="removeRow(row);"></span>
+                                    <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(row, 'ROW');" ng-if="rows.length > 1"></span>
+                                    <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(row, 'ROW');" ng-if="rows.length > 1"></span>
+                </li>
                 <ul ng-repeat="fi in row.filterValues">
                   <li>{{ fi.path }}</li>
                 </ul>
@@ -111,12 +123,15 @@
           </div>
 
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
           <div class="panel panel-primary">
-            <div class="panel-heading">Columns</div>
+            <div class="panel-heading">Kolumner</div>
             <div class="panel-body">
               <ul ng-repeat="col in columns">
-                <li>{{ col.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(col, 'COLUMN');"></span> <span class="glyphicon glyphicon-remove" ng-click="removeColumn(col);"></span></li>
+                <li>{{ col.path }} <span class="glyphicon glyphicon-filter" ng-click="openFilter(col, 'COLUMN');"></span>
+                  <span class="glyphicon glyphicon-remove" ng-click="removeColumn(col);"></span>
+                  <span class="glyphicon glyphicon-arrow-up" ng-click="moveUp(col, 'COLUMN');" ng-if="columns.length > 1"></span>
+                  <span class="glyphicon glyphicon-arrow-down" ng-click="moveDown(col, 'COLUMN');" ng-if="columns.length > 1"></span></li>
                 <ul ng-repeat="fi in col.filterValues">
                     <li>{{ fi.path }}</li>
                 </ul>
@@ -126,28 +141,29 @@
 
         </div>
 
-        <!--
-        <div class="col-md-4">
-          <div class="panel panel-primary">
-            <div class="panel-heading">Filters</div>
-            <div class="panel-body">
-              <ul ng-repeat="filter in filters">
-                <li>{{ filter }} <span class="glyphicon glyphicon-remove" ng-click="removeFilter(filter);"></span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        -->
       </div>
       <div class="row">
         <div class="col-md-4">
-          <button class="btn btn-success" ng-click="doQuery();">Run query</button>
-          <button class="btn btn-info" ng-click="clear();">Clear</button>
+          <button class="btn btn-success" ng-click="doQuery();">Kör fråga</button>
+          <button class="btn btn-primary" ng-click="swapAxes();">Byt axlar</button>
+          <button class="btn btn-info" ng-click="clear();">Rensa</button>
+          <input style="padding-left:20px;" type="checkbox" ng-click="doQuery();" ng-model="includeEmpty"> Exkludera tomma celler
         </div>
+        <div class="col-md-2">
+
+
+
+        </div>
+        <!--
+        <div class="col-md-2">
+          <input type="checkbox" ng-click="doQuery();" ng-model="swapAxis"> Byt axlar
+        </div>
+        -->
       </div>
-          <pre>
-            {{ resultData }}
-          </pre>
+
+      <pre>
+        {{ resultData }}
+      </pre>
 
     </div>
   </div>

@@ -36,6 +36,8 @@ import org.olap4j.metadata.NamedList;
 import org.olap4j.query.Query;
 import org.olap4j.query.QueryDimension;
 import org.olap4j.query.Selection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,8 @@ import java.util.stream.Collectors;
 @Service
 @DependsOn("dbUpdate")
 public class OlapServiceImpl implements OlapService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OlapServiceImpl.class);
 
     public static final String DATABASE_NAME = "Provider=Mondrian;DataSource=Intyg;";
     public static final String CATALOG_NAME = "Intyg";
@@ -219,8 +223,10 @@ public class OlapServiceImpl implements OlapService {
                 buildQueryAxis(q, row, Axis.ROWS);
             }
 
-
-
+            q.getAxes().values().stream().forEach(axis -> axis.setNonEmpty(queryModel.getIncludeEmpty()));
+            if (queryModel.getSwapAxis() ) {
+                q.swapAxes();
+            }
             q.validate();
 
             String mdx = q.getSelect().toString();
@@ -228,6 +234,9 @@ public class OlapServiceImpl implements OlapService {
 
             return q.execute();
         } catch (SQLException e) {
+            LOG.error(e.getMessage());
+            LOG.error(e.getCause().getMessage());
+            LOG.error(e.getCause().getCause().getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -254,7 +263,7 @@ public class OlapServiceImpl implements OlapService {
             q.getAxis(axis).addDimension(rootDimension);
         }
 
-        q.getAxis(axis).setNonEmpty(true);
+       // q.getAxis(axis).setNonEmpty(true);
     }
 
     private boolean isPresentOnAxis(Query q, Axis axis, QueryDimension rootDimension) {
@@ -291,7 +300,7 @@ public class OlapServiceImpl implements OlapService {
                             }
                         }
                     }
-                // Otherwise, try to add the entry normall as Datum.Datum.Ar or Datum.Datum.(All) or similar...
+                // Otherwise, try to add the entry normal as Datum.Datum.Ar or Datum.Datum.(All) or similar...
                 } else if (l.getUniqueName().equals(dimensionEntry.toString())) {
                     rootDimension.include(l);
                 }

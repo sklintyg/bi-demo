@@ -43,5 +43,18 @@
     </Arg>
   </New>
 
+  <New id="DataSource2" class="org.eclipse.jetty.plus.jndi.Resource">
+    <Arg>
+      <Ref id="st"/>
+    </Arg>
+    <Arg>jdbc/st</Arg>
+    <Arg>
+      <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+        <Set name="Url">jdbc:mysql://localhost:3306/st</Set>
+        <Set name="User">st</Set>
+        <Set name="Password">st</Set>
+      </New>
+    </Arg>
+  </New>
 
 </Configure>

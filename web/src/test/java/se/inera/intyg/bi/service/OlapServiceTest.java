@@ -20,6 +20,7 @@ package se.inera.intyg.bi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.olap4j.CellSet;
@@ -51,20 +52,20 @@ public class OlapServiceTest {
     @Autowired
     private OlapService testee;
 
-    @Test
+    @Test @Ignore
     public void testBuildCubeModel() throws JsonProcessingException {
         CubeModel cubeModel = testee.getCubeModel();
         System.out.println("\n\n" + new ObjectMapper().writeValueAsString(cubeModel));
     }
 
-    @Test
+    @Test  @Ignore
     public void testGetDimensionValues() {
         DimensionEntry dimEntry = new DimensionEntry(null, "Datum", "Datum", "Ar");
         List<String> dimensionValues = testee.getDimensionValues(dimEntry);
         assertTrue(dimensionValues.size() > 0);
     }
 
-    @Test
+    @Test  @Ignore
     public void testExecuteQuery() {
 
         QueryModel queryModel = new QueryModel();
@@ -81,7 +82,7 @@ public class OlapServiceTest {
         assertNotNull(cellSet);
     }
 
-    @Test
+    @Test @Ignore
     public void testExecuteQueryWithFilter() {
 
         QueryModel queryModel = new QueryModel();
@@ -139,7 +140,7 @@ public class OlapServiceTest {
         assertNotNull(cellSet);
     }
 
-    @Test
+    @Test @Ignore
     public void test() {
         assertTrue(true);
     }

@@ -29,6 +29,9 @@ public class QueryModel {
     private List<DimensionEntry> rows = new ArrayList<>();
     private List<DimensionEntry> columns = new ArrayList<>();
 
+    private boolean includeEmpty = true;
+    private boolean swapAxis = false;
+
     public List<DimensionEntry> getRows() {
         return rows;
     }
@@ -43,5 +46,21 @@ public class QueryModel {
 
     public void setColumns(List<DimensionEntry> columns) {
         this.columns = columns;
+    }
+
+    public boolean getIncludeEmpty() {
+        return includeEmpty;
+    }
+
+    public void setIncludeEmpty(boolean includeEmpty) {
+        this.includeEmpty = includeEmpty;
+    }
+
+    public boolean getSwapAxis() {
+        return swapAxis;
+    }
+
+    public void setSwapAxis(boolean swapAxis) {
+        this.swapAxis = swapAxis;
     }
 }

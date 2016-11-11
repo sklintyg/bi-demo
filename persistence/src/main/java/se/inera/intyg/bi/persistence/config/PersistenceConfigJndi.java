@@ -41,6 +41,9 @@ public class PersistenceConfigJndi extends PersistenceConfig {
     @Value("${db.jndi}")
     private String jndiName = "jdbc/bi";
 
+    @Value("${db.changelog.file}")
+    private String changeLogFile = "changelog/changelog.xml";
+
     // CHECKSTYLE:OFF EmptyBlock
     @Bean
     DataSource jndiDataSource() {
@@ -59,7 +62,7 @@ public class PersistenceConfigJndi extends PersistenceConfig {
     SpringLiquibase initDb(DataSource dataSource) {
         SpringLiquibase springLiquibase = new SpringLiquibase();
         springLiquibase.setDataSource(dataSource);
-        springLiquibase.setChangeLog("classpath:changelog/changelog.xml");
+        springLiquibase.setChangeLog("classpath:" + changeLogFile);
         return springLiquibase;
     }
 }

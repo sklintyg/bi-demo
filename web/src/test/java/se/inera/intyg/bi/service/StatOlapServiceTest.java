@@ -20,6 +20,7 @@ package se.inera.intyg.bi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.olap4j.CellSet;
@@ -51,13 +52,13 @@ public class StatOlapServiceTest {
     @Autowired
     private OlapService testee;
 
-    @Test
+    @Test @Ignore
     public void testBuildCubeModel() throws JsonProcessingException {
         CubeModel cubeModel = testee.getCubeModel();
         System.out.println("\n\n" + new ObjectMapper().writeValueAsString(cubeModel));
     }
 
-    @Test
+    @Test @Ignore
     public void testExecuteQuery() {
 
         QueryModel queryModel = new QueryModel();
@@ -67,7 +68,6 @@ public class StatOlapServiceTest {
         queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
         queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
         queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Lan", "Lan", "Lan"));
-        // Does not work! queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Lakare", "HsaId", "HsaId"));
         queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Alder", "Ar", "Ar"));
 
      //   queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Datum"));    // Including this kills query...
@@ -78,13 +78,29 @@ public class StatOlapServiceTest {
         assertNotNull(cellSet);
     }
 
-    @Test
+    @Test @Ignore
     public void testExecuteQueryForLakare() {
 
         QueryModel queryModel = new QueryModel();
 
         queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
+        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
         queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Lakare", "HsaId", "HsaId"));
+
+        CellSet cellSet = testee.executeQuery(queryModel);
+        CellSetFormatter csf = new RectangularCellSetFormatter(false);
+        csf.format(cellSet, new PrintWriter(System.out, true));
+        assertNotNull(cellSet);
+    }
+
+    @Test @Ignore
+    public void testExecuteQueryForDates() {
+
+        QueryModel queryModel = new QueryModel();
+
+        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
+        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Year"));
+        //queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Month"));
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);

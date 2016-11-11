@@ -33,13 +33,11 @@
       </Key>
     </Table>
 
-
     <Table name="dim_gender">
       <Key>
         <Column name="id"/>
       </Key>
     </Table>
-
 
     <Table name="dim_date">
       <Key>
@@ -82,13 +80,19 @@
         <Column name="id"/>
       </Key>
     </Table>
-<!--
-    <Link target='dim_vardenhet' source='dim_vardgivare'>
-      <ForeignKey>
-        <Column name='VARDGIVARE_ID'/>
-      </ForeignKey>
-    </Link>
--->
+
+    <Table name="dim_dx_kapitel">
+      <Key>
+        <Column name="id" />
+      </Key>
+    </Table>
+    <!--
+        <Link target='dim_vardenhet' source='dim_vardgivare'>
+          <ForeignKey>
+            <Column name='VARDGIVARE_ID'/>
+          </ForeignKey>
+        </Link>
+    -->
   </PhysicalSchema>
 
   <Cube name='Stat' defaultMeasure='Antal sjukfall'>
@@ -109,7 +113,7 @@
 
       <Dimension name="Lan" table="dim_lan" key="Lan">
         <Attributes>
-          <Attribute name='Lan' hasHierarchy='true' caption="Län">
+          <Attribute name='Lan' hasHierarchy='false' caption="Län">
             <Key>
               <Column name="id"/>
             </Key>
@@ -118,11 +122,30 @@
             </Name>
           </Attribute>
         </Attributes>
+        <Hierarchies>
+          <Hierarchy name='Lan' hasAll='true'>
+            <Level attribute='Lan'>
+            </Level>
+          </Hierarchy>
+        </Hierarchies>
+      </Dimension>
+
+      <Dimension name="Diagnoskapitel" table="dim_dx_kapitel" key="Kapitel">
+        <Attributes>
+          <Attribute name="Kapitel" hasHierarchy="true">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+        </Attributes>
       </Dimension>
 
       <Dimension name="Lakare" table="dim_sjukfalllakare" key="HsaId">
         <Attributes>
-          <Attribute name='HsaId' hasHierarchy='true' caption="hsa-id">
+          <Attribute name='HsaId' hasHierarchy='true' visible="true" caption="hsa-id">
             <Key>
               <Column name="id"/>
             </Key>
@@ -130,15 +153,12 @@
               <Column name='hsaid'/>
             </Name>
           </Attribute>
-          <Attribute name='Alder' hasHierarchy='true' caption="Ålder">
-            <Key>
-              <Column name="age"/>
-            </Key>
-            <Name>
-              <Column table="dim_age" name='text'/>
-            </Name>
-          </Attribute>
-          <Attribute name='Kon' hasHierarchy='true' caption="Kön">
+        </Attributes>
+      </Dimension>
+      <!--
+      <Dimension name="LakareKon" table="dim_sjukfalllakare" key="Kon">
+        <Attributes>
+          <Attribute name='Kon' hasHierarchy='true' visible="true" caption="Kön">
             <Key>
               <Column name="gender"/>
             </Key>
@@ -148,6 +168,32 @@
           </Attribute>
         </Attributes>
       </Dimension>
+
+      <Dimension name="LakareAlder" table="dim_sjukfalllakare" key="Alder">
+        <Attributes>
+        <Attribute name='Alder' hasHierarchy='true' visible="true" caption="Ålder">
+          <Key>
+            <Column name="age"/>
+          </Key>
+          <Name>
+            <Column table="dim_age" name='text'/>
+          </Name>
+        </Attribute>
+       </Attributes>
+      </Dimension>
+       -->
+
+      <!--
+      <Hierarchies>
+        <Hierarchy name="Alder">
+          <Level attribute='Alder'/>
+        </Hierarchy>
+        <Hierarchy name="Kon">
+          <Level attribute='Kon'/>
+        </Hierarchy>
+
+      </Hierarchies>
+      -->
 
       <!--
       <Dimension name="Datum" table="dim_date" key="Datum">
@@ -177,9 +223,9 @@
         </Attributes>
       </Dimension>
 
-      <Dimension name="Sjukskrivningsgrad" table="dim_sjukskrivningsgrad" key="Dagar">
+      <Dimension name="Sjukskrivningsgrad" table="dim_sjukskrivningsgrad" key="Grad">
         <Attributes>
-          <Attribute name='Dagar' hasHierarchy='true' caption="Dagar">
+          <Attribute name='Grad' hasHierarchy='true' caption="Grad">
             <Key>
               <Column name="id"/>
             </Key>
@@ -189,8 +235,39 @@
           </Attribute>
         </Attributes>
       </Dimension>
-    </Dimensions>
 
+      <Dimension name="Datum" table='dim_date' type='TIME' key="ID">
+        <Attributes>
+          <Attribute name='ID' keyColumn='id' hasHierarchy='false'/>
+          <Attribute name='Year' keyColumn='year' levelType='TimeYears' hasHierarchy='false'/>
+
+          <Attribute name='Month' levelType='TimeMonths' hasHierarchy='false'>
+            <Key>
+              <Column name='year'/>
+              <Column name='month'/>
+            </Key>
+            <Name>
+              <Column name='month'/>
+            </Name>
+          </Attribute>
+        </Attributes>
+
+        <Hierarchies>
+          <Hierarchy name='Datum' hasAll='true'>
+          <Level attribute='Year'>
+            <Annotations>
+              <Annotation name="AnalyzerDateFormat">[yyyy]</Annotation>
+            </Annotations>
+          </Level>
+          <Level attribute='Month'>
+            <Annotations>
+              <Annotation name="AnalyzerDateFormat">[yyyy]-[mm]</Annotation>
+            </Annotations>
+          </Level>
+          </Hierarchy>
+        </Hierarchies>
+      </Dimension>
+    </Dimensions>
 
     <MeasureGroups>
       <MeasureGroup name='Standard' table='fact_sjukfall'>
@@ -204,7 +281,13 @@
           <ForeignKeyLink foreignKeyColumn='age' dimension='Alder'/>
           <ForeignKeyLink foreignKeyColumn='lan' dimension='Lan'/>
           <ForeignKeyLink foreignKeyColumn='lakare' dimension='Lakare'/>
-         <!-- <ForeignKeyLink foreignKeyColumn='startdate' dimension='Datum'/>    -->
+          <ForeignKeyLink foreignKeyColumn='startdate' dimension='Datum'/>
+          <ForeignKeyLink foreignKeyColumn='dxkapitel' dimension='Diagnoskapitel'/>
+          <!--
+            <ForeignKeyLink foreignKeyColumn='lakare' dimension='LakareKon'/>
+            <ForeignKeyLink foreignKeyColumn='lakare' dimension='LakareAlder'/>
+            <ForeignKeyLink foreignKeyColumn='startdate' dimension='Datum'/>
+          -->
           <ForeignKeyLink foreignKeyColumn='sjukskrivningsgrad' dimension='Sjukskrivningsgrad'/>
         </DimensionLinks>
       </MeasureGroup>

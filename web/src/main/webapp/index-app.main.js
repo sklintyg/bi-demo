@@ -84,6 +84,12 @@ function parentSegments(path) {
     return str;
 }
 
+function arrayMove(arr, fromIndex, toIndex) {
+    var element = arr[fromIndex];
+    arr.splice(fromIndex, 1);
+    arr.splice(toIndex, 0, element);
+}
+
 
 angular.module('biIndexApp')
     .controller('IndexController', ['$scope', '$http', function($scope, $http) {
@@ -94,7 +100,9 @@ angular.module('biIndexApp')
         $scope.filterDimension = {};
         $scope.filterValues = [];
 
-        $scope.resultData = 'No query executed yet!';
+        $scope.resultData = 'Ingen fråga har körts än!';
+        $scope.includeEmpty = false;
+        $scope.swapAxis = false;
 
         $scope.loadDimensions = function() {
             $http({
@@ -135,8 +143,6 @@ angular.module('biIndexApp')
         }
 
         $scope.addColumn = function(dimension) {
-            console.log('Add col: ' + dimension.path);
-
             var dim = {
                 path: dimension.path,
                 filterValues: []
@@ -169,7 +175,48 @@ angular.module('biIndexApp')
             $scope.doQuery();
         };
         $scope.removeFilter = function(dimension) {
+            $scope.doQuery();
+        };
 
+        $scope.moveUp = function(dimension, type) {
+              if (type == 'ROW') {
+                  var index = $scope.rows.indexOf(dimension);
+                  if (index - 1 > -1) {
+                      arrayMove($scope.rows, index, index - 1);
+                      $scope.doQuery();
+                  }
+              }
+              if (type == 'COLUMN') {
+                var index = $scope.columns.indexOf(dimension);
+                if (index - 1 > -1) {
+                    arrayMove($scope.columns, index, index - 1);
+                    $scope.doQuery();
+                }
+            }
+
+        };
+
+        $scope.moveDown = function(dimension, type) {
+            if (type == 'ROW') {
+                var index = $scope.rows.indexOf(dimension);
+                if (index + 1 < $scope.rows.length) {
+                    arrayMove($scope.rows, index, index + 1);
+                    $scope.doQuery();
+                }
+            }
+            if (type == 'COLUMN') {
+                var index = $scope.columns.indexOf(dimension);
+                if (index + 1 < $scope.columns.length) {
+                    arrayMove($scope.columns, index, index + 1);
+                    $scope.doQuery();
+                }
+            }
+        };
+
+        $scope.swapAxes = function() {
+            var tmp = angular.copy($scope.rows);
+            $scope.rows = $scope.columns;
+            $scope.columns = tmp;
             $scope.doQuery();
         };
 
@@ -216,7 +263,7 @@ angular.module('biIndexApp')
                 url: '/api/mdx/dimension/values',
                 data: dimension.path
             }).success(function(data) {
-                $scope.filterName = dimension.path
+                $scope.filterName = dimension.path;
 
                 var backendValues = data.filter( onlyUnique );
 
@@ -244,7 +291,9 @@ angular.module('biIndexApp')
             // Construct fugly queryModel
             var queryModel = {
                 rows: [],
-                columns: []
+                columns: [],
+                includeEmpty: $scope.includeEmpty,
+                swapAxis: $scope.swapAxis
             };
 
 
