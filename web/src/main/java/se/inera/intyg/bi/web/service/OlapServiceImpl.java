@@ -34,17 +34,17 @@ import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Member;
 import org.olap4j.metadata.NamedList;
 import org.olap4j.query.Query;
-import org.olap4j.query.QueryDimension;
 import org.olap4j.query.Selection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
-import se.inera.intyg.bi.web.service.dto.CubeModel;
-import se.inera.intyg.bi.web.service.dto.DimensionEntry;
-import se.inera.intyg.bi.web.service.dto.DimensionModel;
-import se.inera.intyg.bi.web.service.dto.QueryModel;
+import se.inera.intyg.bi.web.service.dto.cube.CubeModel;
+import se.inera.intyg.bi.web.service.dto.cube.DimensionModel;
+import se.inera.intyg.bi.web.service.dto.cube.FilterModel;
+import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
+import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import javax.annotation.PostConstruct;
 import java.io.PrintWriter;
@@ -182,19 +182,21 @@ public class OlapServiceImpl implements OlapService {
     }
 
     @Override
-    public List<String> getDimensionValues(DimensionEntry dimensionEntry) {
-        List<String> list = new ArrayList<>();
+    public List<FilterModel> getDimensionValues(QueryDimension queryDimension) {
+        List<FilterModel> list = new ArrayList<>();
 
         try {
             Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
             Query q = new Query(olapCubeName, cube);
-            QueryDimension rootDimension = q.getDimension(dimensionEntry.nth(0));
+            org.olap4j.query.QueryDimension rootDimension = q.getDimension(queryDimension.nth(0));
 
             NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
             for (Hierarchy hierarchy : hierarchies) {
                 for (Level l : hierarchy.getLevels()) {
-                    if (l.getUniqueName().equals(dimensionEntry.toString())) {
-                        list.addAll(l.getMembers().stream().map(m -> m.getName()).collect(Collectors.toList()));
+                    if (l.getUniqueName().equals(queryDimension.toString())) {
+                        list.addAll(
+                                l.getMembers().stream().map(m -> new FilterModel(m.getUniqueName(), m.getName())).collect(Collectors.toList())
+                        );
                     }
                 }
             }
@@ -208,6 +210,35 @@ public class OlapServiceImpl implements OlapService {
         }
     }
 
+//    @Override
+//    public List<String> getDimensionValues(QueryDimension queryDimension) {
+//        List<String> list = new ArrayList<>();
+//
+//        try {
+//            Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
+//            Query q = new Query(olapCubeName, cube);
+//            org.olap4j.query.QueryDimension rootDimension = q.getDimension(queryDimension.nth(0));
+//
+//            NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
+//            for (Hierarchy hierarchy : hierarchies) {
+//                for (Level l : hierarchy.getLevels()) {
+//                    if (l.getUniqueName().equals(queryDimension.toString())) {
+//                        list.addAll(
+//                                l.getMembers().stream().map(m -> m.getUniqueName()).collect(Collectors.toList())
+//                        );
+//                    }
+//                }
+//            }
+//
+//            return list;
+//        } catch (OlapException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e.getMessage());
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e.getMessage());
+//        }
+//    }
+
     @Override
     public CellSet executeQuery(QueryModel queryModel) {
         try {
@@ -215,18 +246,15 @@ public class OlapServiceImpl implements OlapService {
             Query q = new Query(olapCubeName, cube);
 
             // Now we start building the actual Olap4j query model.
-            for (DimensionEntry col : queryModel.getColumns()) {
+            for (QueryDimension col : queryModel.getColumns()) {
                 buildQueryAxis(q, col, Axis.COLUMNS);
             }
 
-            for (DimensionEntry row : queryModel.getRows()) {
+            for (QueryDimension row : queryModel.getRows()) {
                 buildQueryAxis(q, row, Axis.ROWS);
             }
 
             q.getAxes().values().stream().forEach(axis -> axis.setNonEmpty(queryModel.getIncludeEmpty()));
-            if (queryModel.getSwapAxis() ) {
-                q.swapAxes();
-            }
             q.validate();
 
             String mdx = q.getSelect().toString();
@@ -242,22 +270,22 @@ public class OlapServiceImpl implements OlapService {
     }
 
 
-    private void buildQueryAxis(Query q, DimensionEntry dimensionEntry, Axis axis) throws OlapException {
+    private void buildQueryAxis(Query q, QueryDimension queryDimension, Axis axis) throws OlapException {
         // Always always start by getting hold of the root dimension.
-        String root = dimensionEntry.nth(0);
+        String root = queryDimension.nth(0);
 
         // The root must _always_ map to a dimension, otherwise we're out of here.
-        QueryDimension rootDimension = q.getDimension(root);
+        org.olap4j.query.QueryDimension rootDimension = q.getDimension(root);
         if (rootDimension == null) {
             throw new IllegalArgumentException("Unknown root row dimension: " + root);
         }
 
         if (rootDimension.getDimension().getUniqueName().equals("[" + MEASURES + "]")) {
             // Measures are handled through members
-            buildQueryMeasure(dimensionEntry, rootDimension);
+            buildQueryMeasure(queryDimension, rootDimension);
         } else {
             // Dimensions are handled through hierarchy -> levels
-            buildQueryDimension(dimensionEntry, rootDimension);
+            buildQueryDimension(queryDimension, rootDimension);
         }
         if (!isPresentOnAxis(q, axis, rootDimension)) {
             q.getAxis(axis).addDimension(rootDimension);
@@ -266,8 +294,8 @@ public class OlapServiceImpl implements OlapService {
        // q.getAxis(axis).setNonEmpty(true);
     }
 
-    private boolean isPresentOnAxis(Query q, Axis axis, QueryDimension rootDimension) {
-        for (QueryDimension qd : q.getAxis(axis).getDimensions()) {
+    private boolean isPresentOnAxis(Query q, Axis axis, org.olap4j.query.QueryDimension rootDimension) {
+        for (org.olap4j.query.QueryDimension qd : q.getAxis(axis).getDimensions()) {
             if (qd.getName().equals(rootDimension.getName())) {
                 return true;
             }
@@ -275,25 +303,25 @@ public class OlapServiceImpl implements OlapService {
         return false;
     }
 
-    private void buildQueryMeasure(DimensionEntry dimensionEntry, QueryDimension rootDimension) throws OlapException {
+    private void buildQueryMeasure(QueryDimension queryDimension, org.olap4j.query.QueryDimension rootDimension) throws OlapException {
         NamedList<Member> rootMembers = rootDimension.getDimension().getDefaultHierarchy().getRootMembers();
         for (Member m : rootMembers) {
-            if (m.getUniqueName().equals(dimensionEntry.toString())) {
+            if (m.getUniqueName().equals(queryDimension.toString())) {
                 rootDimension.include(Selection.Operator.MEMBER, m);
             }
         }
     }
 
-    private void buildQueryDimension(DimensionEntry dimensionEntry, QueryDimension rootDimension) throws OlapException {
+    private void buildQueryDimension(QueryDimension queryDimension, org.olap4j.query.QueryDimension rootDimension) throws OlapException {
         NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
         for (Hierarchy hierarchy : hierarchies) {
 
             for (Level l : hierarchy.getLevels()) {
 
-                // If our dimensionEntry contains values, we must use those...
-                if (dimensionEntry.getFilterValues().size() > 0) {
+                // If our queryDimension contains values, we must use those...
+                if (queryDimension.getFilterValues().size() > 0) {
                     List<Member> members = l.getMembers();
-                    for (DimensionEntry valueEntry : dimensionEntry.getFilterValues()) {
+                    for (QueryDimension valueEntry : queryDimension.getFilterValues()) {
                         for (Member member : members) {
                             if (member.getUniqueName().equals(valueEntry.toString())) {
                                 rootDimension.include(member);
@@ -301,7 +329,7 @@ public class OlapServiceImpl implements OlapService {
                         }
                     }
                 // Otherwise, try to add the entry normal as Datum.Datum.Ar or Datum.Datum.(All) or similar...
-                } else if (l.getUniqueName().equals(dimensionEntry.toString())) {
+                } else if (l.getUniqueName().equals(queryDimension.toString())) {
                     rootDimension.include(l);
                 }
             }

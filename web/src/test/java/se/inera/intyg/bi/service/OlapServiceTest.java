@@ -28,12 +28,14 @@ import org.olap4j.layout.CellSetFormatter;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.query.Selection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import se.inera.intyg.bi.web.service.OlapService;
-import se.inera.intyg.bi.web.service.dto.CubeModel;
-import se.inera.intyg.bi.web.service.dto.DimensionEntry;
-import se.inera.intyg.bi.web.service.dto.QueryModel;
+import se.inera.intyg.bi.web.service.dto.cube.CubeModel;
+import se.inera.intyg.bi.web.service.dto.cube.FilterModel;
+import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
+import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -46,6 +48,7 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "classpath:test-context.xml")
+@ActiveProfiles({"dev", "!stat"})
 public class OlapServiceTest {
 
 
@@ -60,8 +63,8 @@ public class OlapServiceTest {
 
     @Test  @Ignore
     public void testGetDimensionValues() {
-        DimensionEntry dimEntry = new DimensionEntry(null, "Datum", "Datum", "Ar");
-        List<String> dimensionValues = testee.getDimensionValues(dimEntry);
+        QueryDimension dimEntry = new QueryDimension(null, "Datum", "Datum", "Ar");
+        List<FilterModel> dimensionValues = testee.getDimensionValues(dimEntry);
         assertTrue(dimensionValues.size() > 0);
     }
 
@@ -70,11 +73,11 @@ public class OlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskrivningslangd"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Intygstyp","Typ", "Typ"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskrivningslangd"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Intygstyp","Typ", "Typ"));
 
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar"));
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);
@@ -87,12 +90,12 @@ public class OlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-        DimensionEntry konDimension = new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon");
-        konDimension.getFilterValues().add(new DimensionEntry(null, "Kon", "Kon", "F"));
+        QueryDimension konDimension = new QueryDimension(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon");
+        konDimension.getFilterValues().add(new QueryDimension(null, "Kon", "Kon", "F"));
 
-        DimensionEntry arDimension = new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar");
-        arDimension.getFilterValues().add(new DimensionEntry(null, "Datum", "Datum", "2013"));
-        arDimension.getFilterValues().add(new DimensionEntry(null, "Datum", "Datum", "2014"));
+        QueryDimension arDimension = new QueryDimension(Selection.Operator.CHILDREN, "Datum", "Datum", "Ar");
+        arDimension.getFilterValues().add(new QueryDimension(null, "Datum", "Datum", "2013"));
+        arDimension.getFilterValues().add(new QueryDimension(null, "Datum", "Datum", "2014"));
 
         queryModel.getRows().add(konDimension);
         queryModel.getColumns().add(arDimension);
@@ -107,10 +110,10 @@ public class OlapServiceTest {
     public void testExecuteQueryWithMeasures() {
 
         QueryModel queryModel = new QueryModel();
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal intyg"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskr. langd"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Ar", "Ar"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Antal intyg"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskr. langd"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Kon", "Kon"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Ar", "Ar"));
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);
@@ -122,11 +125,11 @@ public class OlapServiceTest {
     public void testComplexQueryWithMeasures() {
 
         QueryModel queryModel = new QueryModel();
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal intyg"));
-       // queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskr. langd"));
-     //   queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Ar", "Ar"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Vardenhet", "Namn"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Antal intyg"));
+       // queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Genomsnittlig sjukskr. langd"));
+     //   queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Kon", "Kon"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Ar", "Ar"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Vardenhet", "Namn"));
 
         try {
             System.out.println(new ObjectMapper().writeValueAsString(queryModel));

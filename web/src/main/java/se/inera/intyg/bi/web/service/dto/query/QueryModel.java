@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.inera.intyg.bi.web.service.dto;
+package se.inera.intyg.bi.web.service.dto.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +26,24 @@ import java.util.List;
  */
 public class QueryModel {
 
-    private List<DimensionEntry> rows = new ArrayList<>();
-    private List<DimensionEntry> columns = new ArrayList<>();
+    private List<QueryDimension> rows = new ArrayList<>();
+    private List<QueryDimension> columns = new ArrayList<>();
 
     private boolean includeEmpty = true;
-    private boolean swapAxis = false;
 
-    public List<DimensionEntry> getRows() {
+    public List<QueryDimension> getRows() {
         return rows;
     }
 
-    public void setRows(List<DimensionEntry> rows) {
+    public void setRows(List<QueryDimension> rows) {
         this.rows = rows;
     }
 
-    public List<DimensionEntry> getColumns() {
+    public List<QueryDimension> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<DimensionEntry> columns) {
+    public void setColumns(List<QueryDimension> columns) {
         this.columns = columns;
     }
 
@@ -54,13 +53,5 @@ public class QueryModel {
 
     public void setIncludeEmpty(boolean includeEmpty) {
         this.includeEmpty = includeEmpty;
-    }
-
-    public boolean getSwapAxis() {
-        return swapAxis;
-    }
-
-    public void setSwapAxis(boolean swapAxis) {
-        this.swapAxis = swapAxis;
     }
 }

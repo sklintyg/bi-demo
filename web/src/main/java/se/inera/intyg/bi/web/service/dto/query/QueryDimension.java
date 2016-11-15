@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.inera.intyg.bi.web.service.dto;
+package se.inera.intyg.bi.web.service.dto.query;
 
 import org.olap4j.query.Selection;
 
@@ -27,21 +27,21 @@ import java.util.List;
 /**
  * Created by eriklupander on 2016-11-03.
  */
-public class DimensionEntry {
+public class QueryDimension {
 
     private Selection.Operator operator = Selection.Operator.MEMBER;
     private List<String> parts = new ArrayList<>();
 
     // TODO use some kind of interface here so we don't allow values within values.
-    private List<DimensionEntry> filterValues = new ArrayList<>();
+    private List<QueryDimension> filterValues = new ArrayList<>();
 
-    public DimensionEntry() {
+    public QueryDimension() {
 
     }
 
-    public DimensionEntry(Selection.Operator operator, String ... parts) {
+    public QueryDimension(Selection.Operator operator, String ... parts) {
         if (parts == null || parts.length == 0) {
-            throw new IllegalArgumentException("Cannot create DimensionEntry without at least one part.");
+            throw new IllegalArgumentException("Cannot create QueryDimension without at least one part.");
         }
         this.operator = operator;
         this.parts = Arrays.asList(parts);
@@ -80,11 +80,11 @@ public class DimensionEntry {
         return buf.toString();
     }
 
-    public List<DimensionEntry> getFilterValues() {
+    public List<QueryDimension> getFilterValues() {
         return filterValues;
     }
 
-    public void setFilterValues(List<DimensionEntry> filterValues) {
+    public void setFilterValues(List<QueryDimension> filterValues) {
         this.filterValues = filterValues;
     }
 

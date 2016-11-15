@@ -23,7 +23,7 @@
   <PhysicalSchema>
     <Table name='fact_sjukfall'>
       <Key>
-        <Column name='startdate'/>         <!-- todo fix when we have ID -->
+        <Column name='id'/>
       </Key>
     </Table>
 
@@ -86,13 +86,38 @@
         <Column name="id" />
       </Key>
     </Table>
-    <!--
-        <Link target='dim_vardenhet' source='dim_vardgivare'>
-          <ForeignKey>
-            <Column name='VARDGIVARE_ID'/>
-          </ForeignKey>
-        </Link>
-    -->
+    <Table name="dim_dx_avsnitt">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+    <Table name="dim_dx_kategori">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+    <Table name="dim_dx_kod">
+      <Key>
+        <Column name="id"/>
+      </Key>
+    </Table>
+
+    <!-- Kapitel -> Avsnitt -> Kategori -> Kod -->
+    <Link target="dim_dx_avsnitt" source="dim_dx_kapitel">
+      <ForeignKey>
+        <Column name="kapitel"/>
+      </ForeignKey>
+    </Link>
+    <Link target="dim_dx_kategori" source="dim_dx_avsnitt">
+      <ForeignKey>
+        <Column name="avsnitt"/>
+      </ForeignKey>
+    </Link>
+    <Link target="dim_dx_kod" source="dim_dx_kategori">
+      <ForeignKey>
+        <Column name="kategori"/>
+      </ForeignKey>
+    </Link>
   </PhysicalSchema>
 
   <Cube name='Stat' defaultMeasure='Antal sjukfall'>
@@ -100,7 +125,7 @@
 
       <Dimension name="Ålder" table="dim_age" key="År">
         <Attributes>
-          <Attribute name='År' hasHierarchy='true' caption="Ålder år" orderByColumn="id">
+          <Attribute name='År' hasHierarchy='true' caption="Ålder år" orderByColumn="id" approxRowCount="200">
             <Key>
               <Column name="id"/>
             </Key>
@@ -130,6 +155,56 @@
         </Hierarchies>
       </Dimension>
 
+      <Dimension name="Diagnos" table="dim_dx_kod" key="Kod">
+        <Attributes>
+          <Attribute name="Kod" hasHierarchy="false">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+
+          <Attribute name="Kategori" table="dim_dx_kategori" parent="Kod" hasHierarchy="false">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+
+          <Attribute name="Avsnitt" table="dim_dx_avsnitt" parent="Kategori" hasHierarchy="false">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+
+          <Attribute name="Kapitel" table="dim_dx_kapitel" parent="Avsnitt" hasHierarchy="false">
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+        </Attributes>
+
+        <Hierarchies>
+          <Hierarchy name="Diagnos">
+            <Level attribute="Kapitel"/>
+            <Level attribute="Avsnitt"/>
+            <Level attribute="Kategori"/>
+            <Level attribute="Kod"/>
+          </Hierarchy>
+        </Hierarchies>
+      </Dimension>
+
+      <!--
       <Dimension name="Diagnoskapitel" table="dim_dx_kapitel" key="Kapitel">
         <Attributes>
           <Attribute name="Kapitel" hasHierarchy="true">
@@ -140,12 +215,57 @@
               <Column name="icd10"/>
             </Name>
           </Attribute>
+
         </Attributes>
       </Dimension>
 
+
+      <Dimension name="Diagnosavsnitt" table="dim_dx_avsnitt" key="Avsnitt">
+        <Attributes>
+
+          <Attribute name="Avsnitt" hasHierarchy="true" >
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <Dimension name="Diagnoskategori" table="dim_dx_kategori" key="Kategori">
+        <Attributes>
+
+          <Attribute name="Kategori" hasHierarchy="true" >
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+
+      <Dimension name="Diagnoskod" table="dim_dx_kod" key="Kod">
+        <Attributes>
+
+          <Attribute name="Kod" hasHierarchy="true" >
+            <Key>
+              <Column name="id"/>
+            </Key>
+            <Name>
+              <Column name="icd10"/>
+            </Name>
+          </Attribute>
+        </Attributes>
+      </Dimension>
+     -->
+
       <Dimension name="Läkare" table="dim_sjukfalllakare" key="HsaId">
         <Attributes>
-          <Attribute name='HsaId' hasHierarchy='true' visible="true" caption="hsa-id">
+          <Attribute name='HsaId' hasHierarchy='true' visible="true" caption="hsa-id" approxRowCount="2000">
             <Key>
               <Column name="id"/>
             </Key>
@@ -272,17 +392,25 @@
     <MeasureGroups>
       <MeasureGroup name='Standard' table='fact_sjukfall'>
         <Measures>
-          <Measure name='Antal sjukfall' column='startdate' aggregator='count' formatString='Standard'/>     <!-- FIXA id här -->
+          <Measure name='Antal sjukfall' column='id' aggregator='count' formatString='Standard'/>     <!-- FIXA id här -->
           <Measure name='Genomsnittl sjukskrivningslangd' column='length' aggregator='avg' formatString='Standard'/>
         </Measures>
 
         <DimensionLinks>
+
           <ForeignKeyLink foreignKeyColumn='gender' dimension='Kön'/>
           <ForeignKeyLink foreignKeyColumn='age' dimension='Ålder'/>
           <ForeignKeyLink foreignKeyColumn='lan' dimension='Län'/>
           <ForeignKeyLink foreignKeyColumn='lakare' dimension='Läkare'/>
           <ForeignKeyLink foreignKeyColumn='startdate' dimension='Datum'/>
+
+          <ForeignKeyLink foreignKeyColumn='dxkod' dimension='Diagnos'/>
+          <!--
           <ForeignKeyLink foreignKeyColumn='dxkapitel' dimension='Diagnoskapitel'/>
+          <ForeignKeyLink foreignKeyColumn='dxavsnitt' dimension='Diagnosavsnitt'/>
+          <ForeignKeyLink foreignKeyColumn='dxkategori' dimension='Diagnoskategori'/>
+          <ForeignKeyLink foreignKeyColumn='dxkod' dimension='Diagnoskod'/>
+          -->
 
           <ForeignKeyLink foreignKeyColumn='sjukskrivningsgrad' dimension='Sjukskrivningsgrad'/>
         </DimensionLinks>

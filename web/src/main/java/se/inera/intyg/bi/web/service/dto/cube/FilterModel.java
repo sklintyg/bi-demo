@@ -16,14 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package se.inera.intyg.bi.persistence.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import se.inera.intyg.bi.persistence.model.FactIntyg;
+package se.inera.intyg.bi.web.service.dto.cube;
 
 /**
- * Created by pebe on 2015-09-03.
+ * Created by eriklupander on 2016-11-14.
  */
-public interface FactIntygRepository extends JpaRepository<FactIntyg, String> {
+public class FilterModel {
+    private String uniqueName;
+    private String displayName;
 
+    public FilterModel(String uniqueName, String displayName) {
+        this.uniqueName = uniqueName.replaceAll("\\[", "").replaceAll("\\]", "");
+        this.displayName = displayName;
+    }
+
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    public void setUniqueName(String uniqueName) {
+        this.uniqueName = uniqueName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
 }

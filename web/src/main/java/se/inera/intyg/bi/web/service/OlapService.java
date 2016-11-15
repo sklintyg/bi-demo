@@ -19,9 +19,10 @@
 package se.inera.intyg.bi.web.service;
 
 import org.olap4j.CellSet;
-import se.inera.intyg.bi.web.service.dto.CubeModel;
-import se.inera.intyg.bi.web.service.dto.DimensionEntry;
-import se.inera.intyg.bi.web.service.dto.QueryModel;
+import se.inera.intyg.bi.web.service.dto.cube.CubeModel;
+import se.inera.intyg.bi.web.service.dto.cube.FilterModel;
+import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
+import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public interface OlapService {
 
     String query(String query);
 
-    List<String> getDimensionValues(DimensionEntry dimensionEntry);
+    List<FilterModel> getDimensionValues(QueryDimension queryDimension);
 
     CellSet executeQuery(QueryModel queryModel);
 }

@@ -28,9 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import se.inera.intyg.bi.web.service.OlapService;
-import se.inera.intyg.bi.web.service.dto.CubeModel;
-import se.inera.intyg.bi.web.service.dto.DimensionEntry;
-import se.inera.intyg.bi.web.service.dto.QueryModel;
+import se.inera.intyg.bi.web.service.dto.cube.CubeModel;
+import se.inera.intyg.bi.web.service.dto.cube.FilterModel;
+import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
+import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -58,7 +59,8 @@ public class OlapController {
         CellSet cellSet = olapService.executeQuery(queryModel);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
-        new RectangularCellSetFormatter(false).format(cellSet, pw);
+        RectangularCellSetFormatter cellSetFormatter = new RectangularCellSetFormatter(false);
+        cellSetFormatter.format(cellSet, pw);
         return sw.toString();
     }
 
@@ -73,9 +75,9 @@ public class OlapController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/mdx/dimension/values", produces = "application/json;charset=utf-8")
-    public List<String> getDimensionValues(@RequestBody String uniqueName) {
-        DimensionEntry dimEntry = new DimensionEntry(null, uniqueName.split("\\."));
-        List<String> dimensionValues = olapService.getDimensionValues(dimEntry);
+    public List<FilterModel> getDimensionValues(@RequestBody String uniqueName) {
+        QueryDimension dimEntry = new QueryDimension(null, uniqueName.split("\\."));
+        List<FilterModel> dimensionValues = olapService.getDimensionValues(dimEntry);
 
         return dimensionValues;
     }

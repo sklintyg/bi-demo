@@ -27,7 +27,6 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 @Configuration
 @PropertySource({ "file:${bi.config.file}", "classpath:version.properties"})
 @ComponentScan({"se.inera.intyg.bi.web"})
-// @ImportResource({ "classpath:META-INF/cxf/cxf.xml", "classpath:securityContext.xml" })
 public class ApplicationConfig {
 
     @Bean

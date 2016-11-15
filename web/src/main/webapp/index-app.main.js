@@ -269,9 +269,9 @@ angular.module('biIndexApp')
 
                 for (var a = 0; a < backendValues.length; a++) {
                     var val = {
-                        title: backendValues[a],
-                        path: parentSegments(dimension.path) + '.' + backendValues[a],
-                        selected: isSelected(parentSegments(dimension.path) + '.' + backendValues[a], dimension.filterValues)
+                        title: backendValues[a].displayName,
+                        path: backendValues[a].uniqueName,
+                        selected: isSelected(backendValues[a].uniqueName, dimension.filterValues)
                     };
                     $scope.filterValues.push(val);
                 }

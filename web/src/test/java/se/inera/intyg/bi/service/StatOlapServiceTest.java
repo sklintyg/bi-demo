@@ -32,9 +32,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import se.inera.intyg.bi.web.service.OlapService;
-import se.inera.intyg.bi.web.service.dto.CubeModel;
-import se.inera.intyg.bi.web.service.dto.DimensionEntry;
-import se.inera.intyg.bi.web.service.dto.QueryModel;
+import se.inera.intyg.bi.web.service.dto.cube.CubeModel;
+import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
+import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import java.io.PrintWriter;
 
@@ -63,14 +63,14 @@ public class StatOlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Genomsnittl sjukskrivningslangd"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Lan", "Lan", "Lan"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Alder", "Ar", "Ar"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Genomsnittl sjukskrivningslangd"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Kon", "Kon", "Kon"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Lan", "Lan", "Lan"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Alder", "Ar", "Ar"));
 
-     //   queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Datum"));    // Including this kills query...
+     //   queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Datum", "Datum", "Datum"));    // Including this kills query...
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);
@@ -83,9 +83,9 @@ public class StatOlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Lakare", "HsaId", "HsaId"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Sjukskrivningsgrad", "Dagar", "Dagar"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Lakare", "HsaId", "HsaId"));
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);
@@ -98,9 +98,9 @@ public class StatOlapServiceTest {
 
         QueryModel queryModel = new QueryModel();
 
-        queryModel.getColumns().add(new DimensionEntry(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
-        queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Year"));
-        //queryModel.getRows().add(new DimensionEntry(Selection.Operator.CHILDREN, "Datum", "Datum", "Month"));
+        queryModel.getColumns().add(new QueryDimension(Selection.Operator.CHILDREN, "Measures", "Antal sjukfall"));
+        queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Datum", "Datum", "Year"));
+        //queryModel.getRows().add(new QueryDimension(Selection.Operator.CHILDREN, "Datum", "Datum", "Month"));
 
         CellSet cellSet = testee.executeQuery(queryModel);
         CellSetFormatter csf = new RectangularCellSetFormatter(false);
