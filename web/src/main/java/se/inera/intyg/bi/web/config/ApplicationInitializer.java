@@ -22,7 +22,6 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import se.inera.intyg.bi.persistence.config.PersistenceConfigDev;
 import se.inera.intyg.bi.persistence.config.PersistenceConfigJndi;
 
 import javax.servlet.ServletException;
@@ -34,7 +33,7 @@ public class ApplicationInitializer implements WebApplicationInitializer {
     public void onStartup(javax.servlet.ServletContext servletContext) throws ServletException {
         AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
 
-        appContext.register(ApplicationConfig.class, PersistenceConfigJndi.class, PersistenceConfigDev.class);
+        appContext.register(ApplicationConfig.class, PersistenceConfigJndi.class);
 
         servletContext.addListener(new ContextLoaderListener(appContext));
 

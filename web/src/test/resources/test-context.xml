@@ -24,7 +24,7 @@
 
   <bean class="se.inera.intyg.bi.web.service.OlapServiceImpl"/>
 
-  <beans profile="!stat">
+  <beans profile="bi">
     <bean name="props" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
       <property name="locations">
         <list>

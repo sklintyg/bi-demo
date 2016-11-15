@@ -47,6 +47,7 @@ import se.inera.intyg.bi.web.service.dto.query.QueryDimension;
 import se.inera.intyg.bi.web.service.dto.query.QueryModel;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
@@ -87,9 +88,14 @@ public class OlapServiceImpl implements OlapService {
      */
     @PostConstruct
     public void init() {
+
+        String absolutePathToDsFile = resolvePathToMondrianSchema();
+        absolutePathToDsFile = absolutePathToDsFile.substring(0, absolutePathToDsFile.lastIndexOf("/"));
+
+
         MondrianServer server =
                 MondrianServer.createWithRepository(
-                        new DynamicContentFinder(dataSourcesFile),
+                        new DynamicContentFinder(absolutePathToDsFile + "/" + dataSourcesFile),
                         new IdentityCatalogLocator());
 
         try {
@@ -333,6 +339,19 @@ public class OlapServiceImpl implements OlapService {
                     rootDimension.include(l);
                 }
             }
+        }
+    }
+
+    private String resolvePathToMondrianSchema() {
+        try {
+            return "file://" + new File(
+                    this.getClass()
+                            .getClassLoader()
+                            .getResource("logback.xml") // logback finns alltid på samma ställe...
+                            .toURI())
+                    .getPath();
+        } catch (Exception e) {
+            throw new RuntimeException("Data source file: " + dataSourcesFile + ": " + e.getMessage());
         }
     }
 

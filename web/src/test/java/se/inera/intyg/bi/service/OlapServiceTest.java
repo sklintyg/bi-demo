@@ -48,14 +48,13 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(value = "classpath:test-context.xml")
-@ActiveProfiles({"dev", "!stat"})
-public class OlapServiceTest {
-
+@ActiveProfiles({"bi"})
+public class OlapServiceTest extends BaseServiceTest {
 
     @Autowired
     private OlapService testee;
 
-    @Test @Ignore
+    @Test  @Ignore
     public void testBuildCubeModel() throws JsonProcessingException {
         CubeModel cubeModel = testee.getCubeModel();
         System.out.println("\n\n" + new ObjectMapper().writeValueAsString(cubeModel));

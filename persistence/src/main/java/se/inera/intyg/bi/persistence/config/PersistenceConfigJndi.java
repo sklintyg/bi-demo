@@ -34,15 +34,15 @@ import javax.sql.DataSource;
 @Configuration
 @Profile("!dev")
 @ComponentScan("se.inera.intyg.bi.persistence")
-public class PersistenceConfigJndi extends PersistenceConfig {
+public class PersistenceConfigJndi {
 
     private static final Logger LOG = LoggerFactory.getLogger(PersistenceConfigJndi.class);
 
     @Value("${db.jndi}")
-    private String jndiName = "jdbc/bi";
+    private String jndiName = "jdbc/st";
 
     @Value("${db.changelog.file}")
-    private String changeLogFile = "changelog/changelog.xml";
+    private String changeLogFile = "changelog/changelog-st.xml";
 
     // CHECKSTYLE:OFF EmptyBlock
     @Bean

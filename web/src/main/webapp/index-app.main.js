@@ -22,27 +22,8 @@ angular.module('biIndexApp', [
 
 ]);
 
-function guid() {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-        s4() + '-' + s4() + s4() + s4();
-}
-
-function isDefined(value) {
-    return value !== null && typeof value !== 'undefined';
-}
 function isEmpty(value) {
     return value === null || typeof value === 'undefined' || value === '';
-}
-function returnJoinedArrayOrNull(value) {
-    return value !== null && value !== undefined ? value.join(', ') : null;
-}
-function valueOrNull(value) {
-    return value !== null && value !== undefined ? value : null;
 }
 
 function isSelected(key, dimensionFilterValues) {
@@ -72,24 +53,20 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-
-function parentSegments(path) {
-    var parts = path.split('.');
-    var str = '';
-    for (var a = 0; a < parts.length - 1; a++) {
-        str += parts[a] + '.'
-    }
-    str = str.substring(0, str.length - 1); // chop off last dot
-
-    return str;
-}
-
 function arrayMove(arr, fromIndex, toIndex) {
     var element = arr[fromIndex];
     arr.splice(fromIndex, 1);
     arr.splice(toIndex, 0, element);
 }
 
+function indexOfAxis(dimArr, path) {
+    for (var a = 0; a < dimArr.length; a++) {
+        if (dimArr[a].path === path) {
+            return a;
+        }
+    }
+    return -1;
+}
 
 angular.module('biIndexApp')
     .controller('IndexController', ['$scope', '$http', function($scope, $http) {
@@ -131,16 +108,18 @@ angular.module('biIndexApp')
         };
 
         $scope.available = function(dimension) {
-            var index = $scope.columns.indexOf(dimension.path);
+            // var index = $scope.columns.indexOf(dimension.path);
+            var index = indexOfAxis($scope.columns, dimension.path);
             if (index > -1) {
                 return false;
             }
-            index = $scope.rows.indexOf(dimension.path);
+            //index = $scope.rows.indexOf(dimension.path);
+            index = indexOfAxis($scope.rows, dimension.path);
             if (index > -1) {
                 return false;
             }
             return true;
-        }
+        };
 
         $scope.addColumn = function(dimension) {
             var dim = {

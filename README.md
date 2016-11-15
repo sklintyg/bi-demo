@@ -21,7 +21,7 @@ Normalfallet i den incheckade konfigurationen är att köra på 'st'-varianten.
     
 Tabeller, index, data etc. kommer skapas av Liquibase vid första uppstart.
 
-### bi-persistence
+## bi-persistence
 
 Detta delprojekt nyttjar Liquibase för att skapa scheman (st eller bi) och populera dessa med data.
 
@@ -52,7 +52,7 @@ Följande tabeller:
 - dim_sjukfalllakare
 
 
-### bi-web
+## bi-web
 Klassisk 'web'-modul för att tillhandahålla tjänstelagret.
 
 - REST-gränssnitt för att läsa ut OLAP-kubens measures och dimensions, ställa frågor osv.
@@ -91,7 +91,10 @@ Man styr huruvida man vill köra med 'bi'-modellen eller 'st'-modellen genom att
             '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8018'
         ]
 
+### Enhetstest / Integrationstest
+Det finns några integrationstester skrivna som verifierar att XML-metadata matchar underliggande relationsdatabas. Dessa är tills vidare avstängda mha @Ignore på testnivå då respektive testsvit kräver att databasen är korrekt uppsatt lokalt.
 
+Testerna skall fungera om man sätter upp respektive databasschema (st, bi) korrekt. Det bör fixas att med H2 skapa databasschema vid integrationstest om/när någon tar denna PoC vidare.
 
 ### tools
 - .groovy-script för att för 'bi'-schema transformera data från tabellen intyg.SJUKFALL_CERT till INSERT-statements för bi.fact_intyg
