@@ -374,16 +374,8 @@
 
         <Hierarchies>
           <Hierarchy name='Datum' hasAll='true'>
-          <Level attribute='År'>
-            <Annotations>
-              <Annotation name="AnalyzerDateFormat">[yyyy]</Annotation>
-            </Annotations>
-          </Level>
-          <Level attribute='Månad'>
-            <Annotations>
-              <Annotation name="AnalyzerDateFormat">[yyyy]-[mm]</Annotation>
-            </Annotations>
-          </Level>
+            <Level attribute='År'/>
+            <Level attribute='Månad'/>
           </Hierarchy>
         </Hierarchies>
       </Dimension>

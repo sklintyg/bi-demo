@@ -1,0 +1,162 @@
+{
+  "measures": {
+    "name": "Measures",
+    "children": [
+      {
+        "name": "Antal sjukfall",
+        "children": []
+      },
+      {
+        "name": "Genomsnittl sjukskrivningslangd",
+        "children": []
+      }
+    ]
+  },
+  "dimensions": {
+    "name": "Dimensions",
+    "children": [
+      {
+        "name": "Ålder",
+        "children": [
+          {
+            "name": "År",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "År",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Län",
+        "children": [
+          {
+            "name": "Län",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "Län",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Diagnos",
+        "children": [
+          {
+            "name": "Diagnos",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "Kapitel",
+                "children": []
+              },
+              {
+                "name": "Avsnitt",
+                "children": []
+              },
+              {
+                "name": "Kategori",
+                "children": []
+              },
+              {
+                "name": "Kod",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Läkare",
+        "children": [
+          {
+            "name": "HsaId",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "HsaId",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Kön",
+        "children": [
+          {
+            "name": "Kön",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "Kön",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Sjukskrivningsgrad",
+        "children": [
+          {
+            "name": "Grad",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "Grad",
+                "children": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Datum",
+        "children": [
+          {
+            "name": "Datum",
+            "children": [
+              {
+                "name": "(All)",
+                "children": []
+              },
+              {
+                "name": "År",
+                "children": []
+              },
+              {
+                "name": "Månad",
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -27,9 +27,15 @@ import java.net.URISyntaxException;
  */
 public abstract class BaseServiceTest {
 
+    /**
+     * Ugly hack to fix issue with Mondrian bootstrapping requiring absolute file URLs where we determine
+     * the 'bi.resources.folder' folder using the known position of the logback.xml file.
+     *
+     */
     @BeforeClass
     public static void setPath() {
         try {
+            // Get the absoluts path to src/main/resources/logback.xml and then chop off the logback part. Ugly as h-ll...
             String absPath = StatOlapServiceTest.class.getClassLoader().getResource("logback.xml").toURI().getPath();
             absPath = absPath.substring(0, absPath.lastIndexOf("/"));   // TODO use File.separatorChar or similar.
             System.setProperty("bi.resources.folder", absPath);

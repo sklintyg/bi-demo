@@ -216,34 +216,6 @@ public class OlapServiceImpl implements OlapService {
         }
     }
 
-//    @Override
-//    public List<String> getDimensionValues(QueryDimension queryDimension) {
-//        List<String> list = new ArrayList<>();
-//
-//        try {
-//            Cube cube = olapConnection.getOlapSchema().getCubes().get(olapCubeName);
-//            Query q = new Query(olapCubeName, cube);
-//            org.olap4j.query.QueryDimension rootDimension = q.getDimension(queryDimension.nth(0));
-//
-//            NamedList<Hierarchy> hierarchies = rootDimension.getDimension().getHierarchies();
-//            for (Hierarchy hierarchy : hierarchies) {
-//                for (Level l : hierarchy.getLevels()) {
-//                    if (l.getUniqueName().equals(queryDimension.toString())) {
-//                        list.addAll(
-//                                l.getMembers().stream().map(m -> m.getUniqueName()).collect(Collectors.toList())
-//                        );
-//                    }
-//                }
-//            }
-//
-//            return list;
-//        } catch (OlapException e) {
-//            e.printStackTrace();
-//            throw new RuntimeException(e.getMessage());
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e.getMessage());
-//        }
-//    }
 
     @Override
     public CellSet executeQuery(QueryModel queryModel) {

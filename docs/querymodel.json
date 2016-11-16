@@ -1,0 +1,34 @@
+{
+  "rows": [
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Datum",
+        "Datum",
+        "År"
+      ],
+      "filterValues": []
+    }
+  ],
+  "columns": [
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Measures",
+        "Antal sjukfall"
+      ],
+      "filterValues": []
+    },
+    {
+      "operator": "CHILDREN",
+      "parts": [
+        "Kön",
+        "Kön",
+        "Kön"
+      ],
+      "filterValues": []
+    }
+  ],
+  "includeEmpty": true,
+  "swapAxis": false
+}
